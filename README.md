@@ -14,7 +14,7 @@ A modern, responsive React todo application with drag-and-drop functionality and
 
 ## Live Demo
 
-[View the live app](https://USERNAME.github.io/todo-app) (Replace USERNAME with your GitHub username)
+[View the live app](https://cbonade.github.io/work-to-do)
 
 ## Getting Started
 
@@ -92,9 +92,7 @@ To deploy to GitHub Pages:
 
 3. Push your code to GitHub:
    ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/todo-app.git
-   git branch -M main
-   git push -u origin main
+   git push origin main
    ```
 
 4. Deploy to GitHub Pages:

@@ -1,25 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { $getSelection } from 'lexical';
+import { $generateHtmlFromNodes } from '@lexical/html';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+
+const theme = {
+  text: {
+    bold: 'editor-text-bold',
+    italic: 'editor-text-italic',
+    underline: 'editor-text-underline',
+    strikethrough: 'editor-text-strikethrough',
+    code: 'editor-text-code',
+  }
+};
+
+function onError(error) {
+  console.error(error);
+}
+
+function ToolbarPlugin() {
+  const [editor] = useLexicalComposerContext();
+
+  const formatText = useCallback((format) => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if (selection) {
+        selection.formatText(format);
+      }
+    });
+  }, [editor]);
+
+  return (
+    <div className="toolbar">
+      <button
+        type="button"
+        onClick={() => formatText('bold')}
+        className="toolbar-btn"
+        title="Bold"
+      >
+        <strong>B</strong>
+      </button>
+      <button
+        type="button"
+        onClick={() => formatText('italic')}
+        className="toolbar-btn"
+        title="Italic"
+      >
+        <em>I</em>
+      </button>
+      <button
+        type="button"
+        onClick={() => formatText('underline')}
+        className="toolbar-btn"
+        title="Underline"
+      >
+        <u>U</u>
+      </button>
+      <button
+        type="button"
+        onClick={() => formatText('strikethrough')}
+        className="toolbar-btn"
+        title="Strikethrough"
+      >
+        <s>S</s>
+      </button>
+    </div>
+  );
+}
 
 const AddTodo = ({ onAddTodo }) => {
-  const [inputValue, setInputValue] = useState('');
+  const [htmlContent, setHtmlContent] = useState('');
+
+  const initialConfig = {
+    namespace: 'TodoEditor',
+    theme,
+    onError,
+    nodes: [HeadingNode, QuoteNode],
+  };
+
+  const onChange = useCallback((editorState) => {
+    editorState.read(() => {
+      const htmlString = $generateHtmlFromNodes(editorState._nodeMap);
+      setHtmlContent(htmlString);
+    });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (inputValue.trim()) {
-      onAddTodo(inputValue);
-      setInputValue('');
+    const textContent = htmlContent.replace(/<[^>]*>/g, '').trim();
+    if (textContent) {
+      onAddTodo(htmlContent);
+      // Clear the editor
+      setHtmlContent('');
     }
   };
 
   return (
     <form className="add-todo-form" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        placeholder="Add a new todo..."
-        className="add-todo-input"
-      />
+      <div className="rich-text-container">
+        <LexicalComposer initialConfig={initialConfig}>
+          <ToolbarPlugin />
+          <div className="editor-container">
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  className="add-todo-input rich-text-input"
+                  placeholder="Add a new todo..."
+                />
+              }
+              placeholder={null}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <OnChangePlugin onChange={onChange} />
+            <HistoryPlugin />
+          </div>
+        </LexicalComposer>
+      </div>
       <button type="submit" className="add-todo-btn">
         Add
       </button>
