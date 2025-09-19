@@ -78,7 +78,11 @@ function App() {
     const todo = todos.find(t => t.id === id);
     if (todo) {
       setTodos(todos.filter(t => t.id !== id));
-      setDoneTodos([...doneTodos, { ...todo, completed: true }]);
+      setDoneTodos([...doneTodos, {
+        ...todo,
+        completed: true,
+        completedDate: new Date().toISOString()
+      }]);
     }
   };
 
@@ -86,7 +90,8 @@ function App() {
     const todo = doneTodos.find(t => t.id === id);
     if (todo) {
       setDoneTodos(doneTodos.filter(t => t.id !== id));
-      setTodos([...todos, { ...todo, completed: false }]);
+      const { completedDate, ...todoWithoutDate } = todo;
+      setTodos([...todos, { ...todoWithoutDate, completed: false }]);
     }
   };
 
@@ -178,6 +183,31 @@ function App() {
     return brightness > 128 ? '#000000' : '#ffffff';
   };
 
+  // Helper function to group done todos by completion date
+  const groupTodosByDate = (todos) => {
+    const groups = {};
+
+    todos.forEach(todo => {
+      if (todo.completedDate) {
+        const date = new Date(todo.completedDate).toLocaleDateString();
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push(todo);
+      }
+    });
+
+    // Sort dates with most recent first
+    const sortedDates = Object.keys(groups).sort((a, b) => {
+      return new Date(b) - new Date(a);
+    });
+
+    return sortedDates.map(date => ({
+      date,
+      todos: groups[date]
+    }));
+  };
+
   return (
     <div className="App">
       <Navigation onOpenTagModal={() => setIsTagModalOpen(true)} />
@@ -224,18 +254,33 @@ function App() {
               </span>
             </div>
             {!isDoneSectionCollapsed && (
-              <div className="todo-list">
-                {doneTodos.map((todo) => (
-                  <TodoItem
-                    key={todo.id}
-                    todo={todo}
-                    onMarkDone={markTodoUndone}
-                    onDelete={(id) => deleteTodo(id, true)}
-                    onEdit={handleEditTodo}
-                    isDone={true}
-                    isDraggable={false}
-                  />
+              <div className="done-todo-groups">
+                {groupTodosByDate(doneTodos).map((group, index) => (
+                  <div key={group.date} className="done-date-group">
+                    <div className="done-date-header">
+                      <h3>{group.date}</h3>
+                      <span className="done-date-count">({group.todos.length})</span>
+                    </div>
+                    <div className="todo-list">
+                      {group.todos.map((todo) => (
+                        <TodoItem
+                          key={todo.id}
+                          todo={todo}
+                          onMarkDone={markTodoUndone}
+                          onDelete={(id) => deleteTodo(id, true)}
+                          onEdit={handleEditTodo}
+                          isDone={true}
+                          isDraggable={false}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
+                {doneTodos.length === 0 && (
+                  <div className="no-done-todos">
+                    No completed todos yet
+                  </div>
+                )}
               </div>
             )}
           </div>

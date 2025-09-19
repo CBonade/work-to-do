@@ -61,6 +61,11 @@ const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDragga
           <span className={`todo-text ${isDone ? 'strikethrough' : ''}`}>
             {renderTextWithLinks(todo.text)}
           </span>
+          {isDone && todo.completedDate && (
+            <div className="completion-date">
+              Completed: {new Date(todo.completedDate).toLocaleDateString()}
+            </div>
+          )}
           {todo.tags && todo.tags.length > 0 && (
             <div className="todo-tags">
               {todo.tags.map((tag) => (
