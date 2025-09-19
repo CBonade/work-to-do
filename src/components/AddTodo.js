@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 const AddTodo = ({ onAddTodo, tags }) => {
   const [inputValue, setInputValue] = useState('');
@@ -47,7 +48,7 @@ const AddTodo = ({ onAddTodo, tags }) => {
             onClick={() => setShowTagSelector(!showTagSelector)}
             title="Add tags"
           >
-            🏷️
+            <LocalOfferIcon sx={{ color: 'white', fontSize: 16 }} />
           </button>
         )}
 

@@ -51,6 +51,9 @@
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .nav-button:hover {
@@ -173,6 +176,9 @@
   font-size: 18px;
   user-select: none;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drag-handle:active {
@@ -318,6 +324,10 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s, transform 0.2s;
+}
+
+.action-btn .MuiSvgIcon-root {
+  transition: color 0.2s;
 }
 
 .action-btn:hover {
@@ -583,6 +593,9 @@
   font-size: 18px;
   color: #e0e0e0;
   transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Tag Sections */

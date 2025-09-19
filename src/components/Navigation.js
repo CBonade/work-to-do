@@ -1,4 +1,5 @@
 import React from 'react';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 const Navigation = ({ onOpenTagModal }) => {
   return (
@@ -14,7 +15,8 @@ const Navigation = ({ onOpenTagModal }) => {
               onClick={onOpenTagModal}
               title="Manage Tags"
             >
-              🏷️ Tags
+              <LocalOfferIcon sx={{ color: 'white', fontSize: 16, marginRight: 1 }} />
+              Tags
             </button>
           </li>
         </ul>

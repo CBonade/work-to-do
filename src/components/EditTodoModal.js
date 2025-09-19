@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 
 const EditTodoModal = ({ isOpen, onClose, todo, tags, onSave }) => {
   const [todoText, setTodoText] = useState('');
@@ -48,7 +49,7 @@ const EditTodoModal = ({ isOpen, onClose, todo, tags, onSave }) => {
         <div className="modal-header">
           <h2>Edit Todo</h2>
           <button className="modal-close" onClick={onClose}>
-            ✕
+            <CloseIcon sx={{ color: 'white', fontSize: 20 }} />
           </button>
         </div>
 

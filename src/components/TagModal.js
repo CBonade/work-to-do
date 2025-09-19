@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const TagModal = ({ isOpen, onClose, tags, onAddTag, onDeleteTag }) => {
   const [newTagName, setNewTagName] = useState('');
@@ -31,7 +33,7 @@ const TagModal = ({ isOpen, onClose, tags, onAddTag, onDeleteTag }) => {
         <div className="modal-header">
           <h2>Manage Tags</h2>
           <button className="modal-close" onClick={onClose}>
-            ✕
+            <CloseIcon sx={{ color: 'white', fontSize: 20 }} />
           </button>
         </div>
 
@@ -85,7 +87,7 @@ const TagModal = ({ isOpen, onClose, tags, onAddTag, onDeleteTag }) => {
                       onClick={() => onDeleteTag(tag.id)}
                       title="Delete tag"
                     >
-                      🗑
+                      <DeleteIcon sx={{ color: '#ff6b6b', fontSize: 16 }} />
                     </button>
                   </div>
                 ))}

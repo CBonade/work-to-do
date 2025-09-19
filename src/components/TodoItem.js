@@ -5,6 +5,11 @@ import {
 import {
   CSS,
 } from '@dnd-kit/utilities';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
+import UndoIcon from '@mui/icons-material/Undo';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDraggable = false }) => {
   const {
@@ -54,7 +59,7 @@ const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDragga
       <div className="todo-content">
         {isDraggable && (
           <div className="drag-handle" {...attributes} {...listeners}>
-            ⋮⋮
+            <DragIndicatorIcon sx={{ color: 'white', fontSize: 18 }} />
           </div>
         )}
         <div className="todo-content-wrapper">
@@ -90,21 +95,25 @@ const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDragga
           onClick={() => onEdit(todo)}
           title="Edit"
         >
-          ✏️
+          <EditIcon sx={{ color: 'white', fontSize: 16 }} />
         </button>
         <button
           className={`action-btn ${isDone ? 'undo-btn' : 'done-btn'}`}
           onClick={() => onMarkDone(todo.id)}
           title={isDone ? 'Mark as undone' : 'Mark as done'}
         >
-          {isDone ? '↶' : '✓'}
+          {isDone ? (
+            <UndoIcon sx={{ color: 'white', fontSize: 16 }} />
+          ) : (
+            <CheckIcon sx={{ color: 'white', fontSize: 16 }} />
+          )}
         </button>
         <button
           className="action-btn delete-btn"
           onClick={() => onDelete(todo.id)}
           title="Delete"
         >
-          🗑
+          <DeleteIcon sx={{ color: 'white', fontSize: 16 }} />
         </button>
       </div>
     </div>

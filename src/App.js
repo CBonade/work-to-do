@@ -18,6 +18,8 @@ import TodoItem from './components/TodoItem';
 import AddTodo from './components/AddTodo';
 import TagModal from './components/TagModal';
 import EditTodoModal from './components/EditTodoModal';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import './App.css';
 
 function App() {
@@ -250,7 +252,11 @@ function App() {
             >
               <h2>Done ({doneTodos.length})</h2>
               <span className="collapse-arrow">
-                {isDoneSectionCollapsed ? '▼' : '▲'}
+                {isDoneSectionCollapsed ? (
+                  <ExpandMoreIcon sx={{ color: 'white', fontSize: 20 }} />
+                ) : (
+                  <ExpandLessIcon sx={{ color: 'white', fontSize: 20 }} />
+                )}
               </span>
             </div>
             {!isDoneSectionCollapsed && (
