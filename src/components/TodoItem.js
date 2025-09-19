@@ -6,7 +6,7 @@ import {
   CSS,
 } from '@dnd-kit/utilities';
 
-const TodoItem = ({ todo, onMarkDone, onDelete, isDone = false, isDraggable = false }) => {
+const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDraggable = false }) => {
   const {
     attributes,
     listeners,
@@ -57,11 +57,36 @@ const TodoItem = ({ todo, onMarkDone, onDelete, isDone = false, isDraggable = fa
             ⋮⋮
           </div>
         )}
-        <span className={`todo-text ${isDone ? 'strikethrough' : ''}`}>
-          {renderTextWithLinks(todo.text)}
-        </span>
+        <div className="todo-content-wrapper">
+          <span className={`todo-text ${isDone ? 'strikethrough' : ''}`}>
+            {renderTextWithLinks(todo.text)}
+          </span>
+          {todo.tags && todo.tags.length > 0 && (
+            <div className="todo-tags">
+              {todo.tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="todo-tag"
+                  style={{
+                    backgroundColor: tag.color,
+                    color: getContrastColor(tag.color),
+                  }}
+                >
+                  {tag.name}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <div className="todo-actions">
+        <button
+          className="action-btn edit-btn"
+          onClick={() => onEdit(todo)}
+          title="Edit"
+        >
+          ✏️
+        </button>
         <button
           className={`action-btn ${isDone ? 'undo-btn' : 'done-btn'}`}
           onClick={() => onMarkDone(todo.id)}
@@ -80,5 +105,14 @@ const TodoItem = ({ todo, onMarkDone, onDelete, isDone = false, isDraggable = fa
     </div>
   );
 };
+
+// Helper function to determine text color based on background
+function getContrastColor(hexColor) {
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? '#000000' : '#ffffff';
+}
 
 export default TodoItem;

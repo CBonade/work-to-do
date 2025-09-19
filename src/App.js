@@ -13,13 +13,20 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import Navigation from './components/Navigation';
 import TodoItem from './components/TodoItem';
 import AddTodo from './components/AddTodo';
+import TagModal from './components/TagModal';
+import EditTodoModal from './components/EditTodoModal';
 import './App.css';
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [doneTodos, setDoneTodos] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+  const [editTodo, setEditTodo] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -31,12 +38,16 @@ function App() {
   useEffect(() => {
     const savedTodos = localStorage.getItem('todos');
     const savedDoneTodos = localStorage.getItem('doneTodos');
+    const savedTags = localStorage.getItem('tags');
 
     if (savedTodos) {
       setTodos(JSON.parse(savedTodos));
     }
     if (savedDoneTodos) {
       setDoneTodos(JSON.parse(savedDoneTodos));
+    }
+    if (savedTags) {
+      setTags(JSON.parse(savedTags));
     }
   }, []);
 
@@ -48,10 +59,15 @@ function App() {
     localStorage.setItem('doneTodos', JSON.stringify(doneTodos));
   }, [doneTodos]);
 
-  const addTodo = (text) => {
+  useEffect(() => {
+    localStorage.setItem('tags', JSON.stringify(tags));
+  }, [tags]);
+
+  const addTodo = (todoData) => {
     const newTodo = {
       id: Date.now().toString(),
-      text: text.trim(),
+      text: typeof todoData === 'string' ? todoData.trim() : todoData.text,
+      tags: typeof todoData === 'object' ? todoData.tags || [] : [],
       completed: false,
     };
     setTodos([...todos, newTodo]);
@@ -94,11 +110,46 @@ function App() {
     }
   }
 
+  const addTag = (tag) => {
+    setTags([...tags, tag]);
+  };
+
+  const deleteTag = (tagId) => {
+    setTags(tags.filter(tag => tag.id !== tagId));
+    // Remove the tag from all todos
+    setTodos(todos.map(todo => ({
+      ...todo,
+      tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
+    })));
+    setDoneTodos(doneTodos.map(todo => ({
+      ...todo,
+      tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
+    })));
+  };
+
+  const handleEditTodo = (todo) => {
+    setEditTodo(todo);
+    setIsEditModalOpen(true);
+  };
+
+  const saveTodoEdit = (updatedTodo) => {
+    if (updatedTodo.completed) {
+      setDoneTodos(doneTodos.map(todo =>
+        todo.id === updatedTodo.id ? updatedTodo : todo
+      ));
+    } else {
+      setTodos(todos.map(todo =>
+        todo.id === updatedTodo.id ? updatedTodo : todo
+      ));
+    }
+  };
+
   return (
     <div className="App">
+      <Navigation onOpenTagModal={() => setIsTagModalOpen(true)} />
+
       <header className="App-header">
-        <h1>My To-Do App</h1>
-        <AddTodo onAddTodo={addTodo} />
+        <AddTodo onAddTodo={addTodo} tags={tags} />
 
         <div className="todo-sections">
           <div className="todo-section">
@@ -119,6 +170,7 @@ function App() {
                       todo={todo}
                       onMarkDone={markTodoDone}
                       onDelete={deleteTodo}
+                      onEdit={handleEditTodo}
                       isDraggable={true}
                     />
                   ))}
@@ -136,6 +188,7 @@ function App() {
                   todo={todo}
                   onMarkDone={markTodoUndone}
                   onDelete={(id) => deleteTodo(id, true)}
+                  onEdit={handleEditTodo}
                   isDone={true}
                   isDraggable={false}
                 />
@@ -144,6 +197,22 @@ function App() {
           </div>
         </div>
       </header>
+
+      <TagModal
+        isOpen={isTagModalOpen}
+        onClose={() => setIsTagModalOpen(false)}
+        tags={tags}
+        onAddTag={addTag}
+        onDeleteTag={deleteTag}
+      />
+
+      <EditTodoModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        todo={editTodo}
+        tags={tags}
+        onSave={saveTodoEdit}
+      />
     </div>
   );
 }
