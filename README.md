@@ -1,20 +1,78 @@
 # Todo App
 
-A modern, responsive React todo application with drag-and-drop functionality and persistent storage.
+A modern, responsive React todo application with comprehensive task management features including drag-and-drop, tagging, and persistent storage.
 
 ## Features
 
-- ✅ Add, complete, and delete todo items
+- ✅ Add, edit, complete, and delete todo items
 - 🖱️ Drag and drop to reorder todos for prioritization
-- 💾 Persistent storage using localStorage - data survives browser sessions
+- 🏷️ Tag system with color-coded labels for organization
 - 📱 Responsive design that works on desktop and mobile
-- 🎨 Beautiful gradient UI with hover effects
-- ✨ Separate "Done" section with strikethrough text for completed items
+- 💾 Persistent storage using localStorage - data survives browser sessions
+- 🎨 Beautiful dark mode UI with hover effects
+- ✨ Collapsible "Done" section with strikethrough text
 - 🔄 Mark items as done/undone with visual feedback
+- 🔗 Automatic URL detection and linking in todo text
+- 📋 Tag-filtered lists showing todos organized by categories
+- ⚡ Navigation menu with tag management
+- 🎯 Three-column responsive layout for tag-organized views
 
 ## Live Demo
 
 [View the live app](https://cbonade.github.io/work-to-do)
+
+## Changelog
+
+### v2.0.0 (2025-09-19) - Tag Management & Enhanced Layout
+**Major Features:**
+- 🏷️ **Tag System**: Complete tag management with color-coded labels
+  - Create, edit, and delete tags with custom colors
+  - Assign multiple tags to todos
+  - Tag selector in add todo form with visual feedback
+- 🎯 **Enhanced Layout**: Improved organization and user experience
+  - Navigation menu with sticky positioning
+  - Collapsible done section (collapsed by default)
+  - Tag-filtered lists in responsive 3-column grid layout
+  - Read-only tag lists showing todos organized by categories
+- ⚡ **Edit Functionality**: Edit existing todos and their tags
+  - Modal-based editing interface
+  - Tag assignment and removal in edit mode
+  - Extensible design for future todo properties
+
+**Technical Improvements:**
+- Modal-based UI design avoiding page navigation
+- Comprehensive localStorage persistence for tags
+- CSS Grid responsive layout system
+- Enhanced dark mode styling throughout
+- Proper contrast calculation for tag colors
+
+### v1.1.0 (2025-01-XX) - URL Linking & Dark Mode
+**Features:**
+- 🔗 **URL Detection**: Automatic URL recognition and linking in todo text
+- 🎨 **Dark Mode**: Complete dark theme implementation
+  - Traditional dark color scheme
+  - Improved visual hierarchy
+  - Enhanced hover effects and transitions
+
+**Technical Improvements:**
+- Regex-based URL parsing and link generation
+- Updated CSS with dark mode color palette
+- Improved accessibility with proper contrast ratios
+
+### v1.0.0 (2025-01-XX) - Initial Release
+**Core Features:**
+- ✅ **Basic Todo Management**: Add, complete, delete todos
+- 🖱️ **Drag & Drop**: Reorder todos with @dnd-kit library
+- 💾 **Persistent Storage**: localStorage integration for data persistence
+- 📱 **Responsive Design**: Mobile-friendly layout
+- ✨ **Done Section**: Separate section for completed todos with strikethrough
+- 🔄 **Status Toggle**: Mark todos as done/undone
+
+**Technical Foundation:**
+- React 19 with functional components and hooks
+- @dnd-kit for drag-and-drop functionality (React 19 compatible)
+- GitHub Pages deployment with automated build process
+- Create React App foundation with modern tooling
 
 ## Getting Started
 
