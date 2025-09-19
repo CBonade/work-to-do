@@ -141,6 +141,20 @@
   color: #888;
 }
 
+.todo-link {
+  color: #4dabf7;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.todo-link:hover {
+  color: #74c0fc;
+}
+
+.todo-link:visited {
+  color: #9775fa;
+}
+
 .todo-actions {
   display: flex;
   gap: 8px;

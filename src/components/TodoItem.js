@@ -22,6 +22,29 @@ const TodoItem = ({ todo, onMarkDone, onDelete, isDone = false, isDraggable = fa
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const renderTextWithLinks = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="todo-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -35,7 +58,7 @@ const TodoItem = ({ todo, onMarkDone, onDelete, isDone = false, isDraggable = fa
           </div>
         )}
         <span className={`todo-text ${isDone ? 'strikethrough' : ''}`}>
-          {todo.text}
+          {renderTextWithLinks(todo.text)}
         </span>
       </div>
       <div className="todo-actions">
