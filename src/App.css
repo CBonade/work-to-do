@@ -1,6 +1,6 @@
 .App {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #1a1a1a;
   padding: 20px;
   font-family: 'Arial', sans-serif;
 }
@@ -8,14 +8,15 @@
 .App-header {
   max-width: 800px;
   margin: 0 auto;
-  color: white;
+  color: #e0e0e0;
 }
 
 .App h1 {
   text-align: center;
   margin-bottom: 30px;
   font-size: 2.5rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 .add-todo-form {
@@ -29,20 +30,23 @@
   flex: 1;
   max-width: 400px;
   padding: 12px 16px;
-  border: none;
+  border: 1px solid #404040;
   border-radius: 8px;
   font-size: 16px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .add-todo-input:focus {
   outline: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  border-color: #007acc;
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.3);
 }
 
 .add-todo-btn {
   padding: 12px 24px;
-  background-color: #4CAF50;
+  background-color: #007acc;
   color: white;
   border: none;
   border-radius: 8px;
@@ -52,7 +56,7 @@
 }
 
 .add-todo-btn:hover {
-  background-color: #45a049;
+  background-color: #005a9e;
 }
 
 .todo-sections {
@@ -62,16 +66,18 @@
 }
 
 .todo-section, .done-section {
-  background: rgba(255,255,255,0.1);
+  background: #262626;
+  border: 1px solid #404040;
   border-radius: 12px;
   padding: 20px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 .todo-section h2, .done-section h2 {
   margin: 0 0 20px 0;
   font-size: 1.5rem;
   text-align: center;
+  color: #ffffff;
 }
 
 .todo-list {
@@ -84,22 +90,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255,255,255,0.9);
+  background: #3d3d3d;
+  border: 1px solid #505050;
   border-radius: 8px;
   padding: 16px;
-  color: #333;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .todo-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  background: #454545;
 }
 
 .todo-item.dragging {
   transform: rotate(5deg);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
 }
 
 .todo-content {
@@ -111,7 +119,7 @@
 
 .drag-handle {
   cursor: grab;
-  color: #888;
+  color: #999;
   font-size: 18px;
   user-select: none;
   line-height: 1;
@@ -125,6 +133,7 @@
   flex: 1;
   font-size: 16px;
   text-align: left;
+  color: #e0e0e0;
 }
 
 .todo-text.strikethrough {
@@ -155,34 +164,36 @@
 }
 
 .done-btn {
-  background-color: #4CAF50;
+  background-color: #28a745;
   color: white;
 }
 
 .done-btn:hover {
-  background-color: #45a049;
+  background-color: #1e7e34;
 }
 
 .undo-btn {
-  background-color: #FF9800;
-  color: white;
+  background-color: #ffc107;
+  color: #212529;
 }
 
 .undo-btn:hover {
-  background-color: #F57C00;
+  background-color: #e0a800;
 }
 
 .delete-btn {
-  background-color: #f44336;
+  background-color: #dc3545;
   color: white;
 }
 
 .delete-btn:hover {
-  background-color: #d32f2f;
+  background-color: #bd2130;
 }
 
 .todo-item.done {
-  background: rgba(255,255,255,0.6);
+  background: #2d2d2d;
+  border-color: #404040;
+  opacity: 0.8;
 }
 
 @media (max-width: 768px) {
