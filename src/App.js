@@ -27,6 +27,7 @@ function App() {
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [editTodo, setEditTodo] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDoneSectionCollapsed, setIsDoneSectionCollapsed] = useState(true);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -144,6 +145,39 @@ function App() {
     }
   };
 
+  // Helper function to render text with links
+  const renderTextWithLinks = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="todo-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
+  // Helper function to determine text color based on background
+  const getContrastColor = (hexColor) => {
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+  };
+
   return (
     <div className="App">
       <Navigation onOpenTagModal={() => setIsTagModalOpen(true)} />
@@ -180,21 +214,92 @@ function App() {
           </div>
 
           <div className="done-section">
-            <h2>Done ({doneTodos.length})</h2>
-            <div className="todo-list">
-              {doneTodos.map((todo) => (
-                <TodoItem
-                  key={todo.id}
-                  todo={todo}
-                  onMarkDone={markTodoUndone}
-                  onDelete={(id) => deleteTodo(id, true)}
-                  onEdit={handleEditTodo}
-                  isDone={true}
-                  isDraggable={false}
-                />
-              ))}
+            <div
+              className="collapsible-header"
+              onClick={() => setIsDoneSectionCollapsed(!isDoneSectionCollapsed)}
+            >
+              <h2>Done ({doneTodos.length})</h2>
+              <span className="collapse-arrow">
+                {isDoneSectionCollapsed ? '▼' : '▲'}
+              </span>
             </div>
+            {!isDoneSectionCollapsed && (
+              <div className="todo-list">
+                {doneTodos.map((todo) => (
+                  <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onMarkDone={markTodoUndone}
+                    onDelete={(id) => deleteTodo(id, true)}
+                    onEdit={handleEditTodo}
+                    isDone={true}
+                    isDraggable={false}
+                  />
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Tag-filtered lists */}
+          {tags.length > 0 && (
+            <div className="tag-sections">
+              <h2>Lists by Tag</h2>
+              <div className="tag-lists-grid">
+                {tags.map((tag) => {
+                  const tagTodos = todos.filter(todo =>
+                    todo.tags && todo.tags.some(t => t.id === tag.id)
+                  );
+
+                  if (tagTodos.length === 0) return null;
+
+                  return (
+                    <div key={tag.id} className="tag-list-section">
+                      <div className="tag-list-header">
+                        <span
+                          className="tag-list-title"
+                          style={{
+                            backgroundColor: tag.color,
+                            color: getContrastColor(tag.color),
+                          }}
+                        >
+                          {tag.name}
+                        </span>
+                        <span className="tag-list-count">({tagTodos.length})</span>
+                      </div>
+                      <div className="tag-todo-list">
+                        {tagTodos.map((todo) => (
+                          <div key={todo.id} className="tag-todo-item">
+                            <span className="tag-todo-text">
+                              {renderTextWithLinks(todo.text)}
+                            </span>
+                            {todo.tags && todo.tags.length > 1 && (
+                              <div className="tag-todo-other-tags">
+                                {todo.tags
+                                  .filter(t => t.id !== tag.id)
+                                  .map((otherTag) => (
+                                    <span
+                                      key={otherTag.id}
+                                      className="tag-todo-other-tag"
+                                      style={{
+                                        backgroundColor: otherTag.color,
+                                        color: getContrastColor(otherTag.color),
+                                      }}
+                                    >
+                                      {otherTag.name}
+                                    </span>
+                                  ))
+                                }
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </header>
 

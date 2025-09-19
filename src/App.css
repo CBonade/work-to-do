@@ -562,3 +562,128 @@
 .tag-delete:hover {
   background-color: rgba(255, 107, 107, 0.2);
 }
+
+/* Collapsible Done Section */
+.collapsible-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+  padding: 0 10px;
+  border-radius: 8px;
+}
+
+.collapsible-header:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.collapse-arrow {
+  font-size: 18px;
+  color: #e0e0e0;
+  transition: transform 0.2s;
+}
+
+/* Tag Sections */
+.tag-sections {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 2px solid #404040;
+}
+
+.tag-sections h2 {
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+}
+
+.tag-lists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tag-list-section {
+  background: #2d2d2d;
+  border: 1px solid #404040;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.tag-list-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #404040;
+}
+
+.tag-list-title {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.tag-list-count {
+  color: #888;
+  font-size: 14px;
+}
+
+.tag-todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-todo-item {
+  background: #3d3d3d;
+  border: 1px solid #505050;
+  border-radius: 6px;
+  padding: 10px;
+  transition: background-color 0.2s;
+}
+
+.tag-todo-item:hover {
+  background: #454545;
+}
+
+.tag-todo-text {
+  color: #e0e0e0;
+  font-size: 14px;
+  line-height: 1.4;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.tag-todo-other-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag-todo-other-tag {
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+@media (max-width: 768px) {
+  .tag-lists-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .tag-list-section {
+    padding: 12px;
+  }
+}
