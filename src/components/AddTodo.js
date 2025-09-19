@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { $getSelection } from 'lexical';
+import { $getRoot, $getSelection } from 'lexical';
 import { $generateHtmlFromNodes } from '@lexical/html';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -74,8 +74,24 @@ function ToolbarPlugin() {
   );
 }
 
+function ClearPlugin({ clearTrigger }) {
+  const [editor] = useLexicalComposerContext();
+
+  React.useEffect(() => {
+    if (clearTrigger) {
+      editor.update(() => {
+        const root = $getRoot();
+        root.clear();
+      });
+    }
+  }, [editor, clearTrigger]);
+
+  return null;
+}
+
 const AddTodo = ({ onAddTodo }) => {
   const [htmlContent, setHtmlContent] = useState('');
+  const [clearTrigger, setClearTrigger] = useState(0);
 
   const initialConfig = {
     namespace: 'TodoEditor',
@@ -86,7 +102,7 @@ const AddTodo = ({ onAddTodo }) => {
 
   const onChange = useCallback((editorState) => {
     editorState.read(() => {
-      const htmlString = $generateHtmlFromNodes(editorState._nodeMap);
+      const htmlString = $generateHtmlFromNodes(editorState, null);
       setHtmlContent(htmlString);
     });
   }, []);
@@ -98,6 +114,7 @@ const AddTodo = ({ onAddTodo }) => {
       onAddTodo(htmlContent);
       // Clear the editor
       setHtmlContent('');
+      setClearTrigger(prev => prev + 1);
     }
   };
 
@@ -119,6 +136,7 @@ const AddTodo = ({ onAddTodo }) => {
             />
             <OnChangePlugin onChange={onChange} />
             <HistoryPlugin />
+            <ClearPlugin clearTrigger={clearTrigger} />
           </div>
         </LexicalComposer>
       </div>
