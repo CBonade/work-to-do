@@ -22,14 +22,27 @@ const TodoItem = ({ todo, onMarkDone, onDelete, isDone = false, isDraggable = fa
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const renderRichTextWithLinks = (htmlContent) => {
-    // First convert URLs to links in the HTML content
-    const urlRegex = /(https?:\/\/[^\s<]+)/g;
-    const htmlWithLinks = htmlContent.replace(urlRegex, (url) => {
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="todo-link" onclick="event.stopPropagation()">${url}</a>`;
-    });
+  const renderTextWithLinks = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
 
-    return { __html: htmlWithLinks };
+    return parts.map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="todo-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
   };
 
   return (
@@ -44,10 +57,9 @@ const TodoItem = ({ todo, onMarkDone, onDelete, isDone = false, isDraggable = fa
             ⋮⋮
           </div>
         )}
-        <div
-          className={`todo-text ${isDone ? 'strikethrough' : ''}`}
-          dangerouslySetInnerHTML={renderRichTextWithLinks(todo.text)}
-        />
+        <span className={`todo-text ${isDone ? 'strikethrough' : ''}`}>
+          {renderTextWithLinks(todo.text)}
+        </span>
       </div>
       <div className="todo-actions">
         <button
