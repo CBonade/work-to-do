@@ -6,6 +6,39 @@ const TagModal = ({ isOpen, onClose, tags, onAddTag, onDeleteTag }) => {
   const [newTagName, setNewTagName] = useState('');
   const [newTagColor, setNewTagColor] = useState('#007acc');
 
+  const presetColors = [
+    '#007acc', // Blue (default)
+    '#28a745', // Green
+    '#dc3545', // Red
+    '#ffc107', // Yellow
+    '#6f42c1', // Purple
+    '#fd7e14', // Orange
+    '#20c997', // Teal
+    '#e83e8c', // Pink
+    '#6c757d', // Gray
+    '#17a2b8', // Cyan
+    '#343a40', // Dark
+    '#f8f9fa', // Light
+    '#495057', // Dark Gray
+    '#007bff', // Primary Blue
+    '#6610f2', // Indigo
+    '#e91e63', // Deep Pink
+    '#ff9800', // Amber
+    '#795548', // Brown
+    '#607d8b', // Blue Gray
+    '#9c27b0', // Deep Purple
+    '#3f51b5', // Indigo Blue
+    '#2196f3', // Light Blue
+    '#00bcd4', // Cyan Blue
+    '#009688', // Teal Green
+    '#4caf50', // Light Green
+    '#8bc34a', // Lime
+    '#cddc39', // Lime Yellow
+    '#ffeb3b', // Yellow Bright
+    '#ff5722', // Deep Orange
+    '#9e9e9e'  // Medium Gray
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newTagName.trim()) {
@@ -52,13 +85,18 @@ const TagModal = ({ isOpen, onClose, tags, onAddTag, onDeleteTag }) => {
             </div>
             <div className="form-group">
               <label htmlFor="tagColor">Tag Color</label>
-              <input
-                id="tagColor"
-                type="color"
-                value={newTagColor}
-                onChange={(e) => setNewTagColor(e.target.value)}
-                className="form-color"
-              />
+              <div className="color-picker-grid">
+                {presetColors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`color-option ${newTagColor === color ? 'selected' : ''}`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => setNewTagColor(color)}
+                    title={color}
+                  />
+                ))}
+              </div>
             </div>
             <button type="submit" className="btn-primary">
               Add Tag

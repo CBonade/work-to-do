@@ -89,6 +89,8 @@
   background-color: #2d2d2d;
   color: #e0e0e0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .add-todo-input:focus {
@@ -106,6 +108,8 @@
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .add-todo-btn:hover {
@@ -190,6 +194,9 @@
   font-size: 16px;
   text-align: left;
   color: #e0e0e0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .todo-text.strikethrough {
@@ -201,6 +208,8 @@
   color: #4dabf7;
   text-decoration: underline;
   transition: color 0.2s;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .todo-link:hover {
@@ -221,14 +230,18 @@
 
 /* Tags in AddTodo */
 .tag-toggle-btn {
-  padding: 12px;
+  padding: 12px 16px;
   background-color: #404040;
   border: 1px solid #505050;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #e0e0e0;
   cursor: pointer;
   font-size: 16px;
   transition: all 0.2s;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tag-toggle-btn:hover,
@@ -525,6 +538,48 @@
   background-color: #5a6268;
 }
 
+/* Color Picker Grid */
+.color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  max-width: 320px;
+}
+
+.color-option {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #404040;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.color-option.selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.color-option.selected::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
 /* Tag Form Styles */
 .tag-form {
   border-bottom: 1px solid #404040;
@@ -674,6 +729,9 @@
   line-height: 1.4;
   display: block;
   margin-bottom: 6px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .tag-todo-other-tags {
