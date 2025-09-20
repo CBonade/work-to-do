@@ -23,13 +23,31 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import './App.css';
 
 function App() {
-  const [todos, setTodos] = useState([]);
-  const [doneTodos, setDoneTodos] = useState([]);
-  const [tags, setTags] = useState([]);
+  const [currentContext, setCurrentContext] = useState('work');
+
+  // Work context state
+  const [workTodos, setWorkTodos] = useState([]);
+  const [workDoneTodos, setWorkDoneTodos] = useState([]);
+  const [workTags, setWorkTags] = useState([]);
+
+  // Personal context state
+  const [personalTodos, setPersonalTodos] = useState([]);
+  const [personalDoneTodos, setPersonalDoneTodos] = useState([]);
+  const [personalTags, setPersonalTags] = useState([]);
+
+  // UI state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [editTodo, setEditTodo] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDoneSectionCollapsed, setIsDoneSectionCollapsed] = useState(true);
+
+  // Current context data (computed)
+  const todos = currentContext === 'work' ? workTodos : personalTodos;
+  const doneTodos = currentContext === 'work' ? workDoneTodos : personalDoneTodos;
+  const tags = currentContext === 'work' ? workTags : personalTags;
+  const setTodos = currentContext === 'work' ? setWorkTodos : setPersonalTodos;
+  const setDoneTodos = currentContext === 'work' ? setWorkDoneTodos : setPersonalDoneTodos;
+  const setTags = currentContext === 'work' ? setWorkTags : setPersonalTags;
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -38,33 +56,91 @@ function App() {
     })
   );
 
+  // Load data on mount
   useEffect(() => {
-    const savedTodos = localStorage.getItem('todos');
-    const savedDoneTodos = localStorage.getItem('doneTodos');
-    const savedTags = localStorage.getItem('tags');
+    const savedContext = localStorage.getItem('currentContext');
+    if (savedContext) {
+      setCurrentContext(savedContext);
+    }
 
-    if (savedTodos) {
-      setTodos(JSON.parse(savedTodos));
+    // Load work data
+    const savedWorkTodos = localStorage.getItem('work_todos');
+    const savedWorkDoneTodos = localStorage.getItem('work_doneTodos');
+    const savedWorkTags = localStorage.getItem('work_tags');
+
+    if (savedWorkTodos) {
+      setWorkTodos(JSON.parse(savedWorkTodos));
     }
-    if (savedDoneTodos) {
-      setDoneTodos(JSON.parse(savedDoneTodos));
+    if (savedWorkDoneTodos) {
+      setWorkDoneTodos(JSON.parse(savedWorkDoneTodos));
     }
-    if (savedTags) {
-      setTags(JSON.parse(savedTags));
+    if (savedWorkTags) {
+      setWorkTags(JSON.parse(savedWorkTags));
+    }
+
+    // Load personal data
+    const savedPersonalTodos = localStorage.getItem('personal_todos');
+    const savedPersonalDoneTodos = localStorage.getItem('personal_doneTodos');
+    const savedPersonalTags = localStorage.getItem('personal_tags');
+
+    if (savedPersonalTodos) {
+      setPersonalTodos(JSON.parse(savedPersonalTodos));
+    }
+    if (savedPersonalDoneTodos) {
+      setPersonalDoneTodos(JSON.parse(savedPersonalDoneTodos));
+    }
+    if (savedPersonalTags) {
+      setPersonalTags(JSON.parse(savedPersonalTags));
+    }
+
+    // Migrate existing data to work context if no context-specific data exists
+    if (!savedWorkTodos && !savedPersonalTodos) {
+      const legacyTodos = localStorage.getItem('todos');
+      const legacyDoneTodos = localStorage.getItem('doneTodos');
+      const legacyTags = localStorage.getItem('tags');
+
+      if (legacyTodos) {
+        setWorkTodos(JSON.parse(legacyTodos));
+      }
+      if (legacyDoneTodos) {
+        setWorkDoneTodos(JSON.parse(legacyDoneTodos));
+      }
+      if (legacyTags) {
+        setWorkTags(JSON.parse(legacyTags));
+      }
     }
   }, []);
 
+  // Save context
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
+    localStorage.setItem('currentContext', currentContext);
+  }, [currentContext]);
+
+  // Save work data
+  useEffect(() => {
+    localStorage.setItem('work_todos', JSON.stringify(workTodos));
+  }, [workTodos]);
 
   useEffect(() => {
-    localStorage.setItem('doneTodos', JSON.stringify(doneTodos));
-  }, [doneTodos]);
+    localStorage.setItem('work_doneTodos', JSON.stringify(workDoneTodos));
+  }, [workDoneTodos]);
 
   useEffect(() => {
-    localStorage.setItem('tags', JSON.stringify(tags));
-  }, [tags]);
+    localStorage.setItem('work_tags', JSON.stringify(workTags));
+  }, [workTags]);
+
+  // Save personal data
+  useEffect(() => {
+    localStorage.setItem('personal_todos', JSON.stringify(personalTodos));
+  }, [personalTodos]);
+
+  useEffect(() => {
+    localStorage.setItem('personal_doneTodos', JSON.stringify(personalDoneTodos));
+  }, [personalDoneTodos]);
+
+  useEffect(() => {
+    localStorage.setItem('personal_tags', JSON.stringify(personalTags));
+  }, [personalTags]);
 
   const addTodo = (todoData) => {
     const newTodo = {
@@ -185,6 +261,13 @@ function App() {
     return brightness > 128 ? '#000000' : '#ffffff';
   };
 
+  const handleContextChange = (newContext) => {
+    setCurrentContext(newContext);
+    setIsTagModalOpen(false);
+    setIsEditModalOpen(false);
+    setEditTodo(null);
+  };
+
   // Helper function to group done todos by completion date
   const groupTodosByDate = (todos) => {
     const groups = {};
@@ -212,14 +295,23 @@ function App() {
 
   return (
     <div className="App">
-      <Navigation onOpenTagModal={() => setIsTagModalOpen(true)} />
+      <Navigation
+        onOpenTagModal={() => setIsTagModalOpen(true)}
+        currentContext={currentContext}
+        onContextChange={handleContextChange}
+      />
 
       <header className="App-header">
         <AddTodo onAddTodo={addTodo} tags={tags} />
 
         <div className="todo-sections">
           <div className="todo-section">
-            <h2>To Do ({todos.length})</h2>
+            <div className="section-header">
+              <h2>To Do ({todos.length})</h2>
+              <span className={`context-indicator context-${currentContext}`}>
+                {currentContext === 'work' ? '💼' : '🏠'} {currentContext.charAt(0).toUpperCase() + currentContext.slice(1)}
+              </span>
+            </div>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}

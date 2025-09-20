@@ -24,6 +24,44 @@
   height: 60px;
 }
 
+.nav-center {
+  display: flex;
+  align-items: center;
+}
+
+.context-tabs {
+  display: flex;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.context-tab {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.context-tab:hover {
+  background: #404040;
+}
+
+.context-tab.active {
+  background: #007acc;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 122, 204, 0.3);
+}
+
 .nav-brand h1 {
   color: #ffffff;
   margin: 0;
@@ -130,11 +168,37 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .todo-section h2, .done-section h2 {
-  margin: 0 0 20px 0;
+  margin: 0;
   font-size: 1.5rem;
-  text-align: center;
   color: #ffffff;
+}
+
+.context-indicator {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.context-indicator.context-work {
+  background: rgba(0, 122, 204, 0.2);
+  color: #4dabf7;
+  border: 1px solid rgba(0, 122, 204, 0.3);
+}
+
+.context-indicator.context-personal {
+  background: rgba(40, 167, 69, 0.2);
+  color: #51cf66;
+  border: 1px solid rgba(40, 167, 69, 0.3);
 }
 
 .todo-list {
