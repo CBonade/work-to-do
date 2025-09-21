@@ -21,9 +21,59 @@ A modern, responsive React todo application with comprehensive task management f
 
 [View the live app](https://cbonade.github.io/work-to-do)
 
+## Development & Deployment
+
+### Automated Releases
+
+Use the automated release script for proper versioning:
+
+```bash
+# Patch release (bug fixes): 2.0.1 → 2.0.2
+./scripts/release.sh patch
+
+# Minor release (new features): 2.0.1 → 2.1.0
+./scripts/release.sh minor
+
+# Major release (breaking changes): 2.0.1 → 3.0.0
+./scripts/release.sh major
+```
+
+This script automatically:
+- Bumps version in `package.json` and `manifest.json`
+- Creates git commit and tag
+- Builds and deploys to GitHub Pages
+- Pushes changes to repository
+
+### Manual Deployment
+
+If needed, you can deploy manually:
+
+```bash
+npm run build
+npm run deploy
+git tag v[VERSION] -m "Release notes"
+git push origin --tags
+```
+
+### Version Strategy
+
+- **Major (X.0.0)**: Breaking changes, new architecture, major features
+- **Minor (X.Y.0)**: New features, significant improvements
+- **Patch (X.Y.Z)**: Bug fixes, small improvements
+
+See [CHANGELOG.md](./CHANGELOG.md) for detailed version history.
+
 ## Changelog
 
-### v2.0.0 (2025-09-19) - Tag Management & Enhanced Layout
+### v2.0.1 (2025-01-25) - Mobile UI Improvements
+**Mobile-First Enhancements:**
+- 📱 **Touch-Friendly Reordering**: Up/down arrows replace drag-and-drop on mobile
+- 📲 **Consolidated Actions**: Edit/Delete collapsed into dropdown menu
+- 📏 **Responsive Sizing**: Mobile-optimized logo and component sizing
+- 🎯 **Simplified UI**: Done items show only undo button on mobile
+- 🔧 **Developer Tools**: PNG icon generator for Safari PWA compatibility
+
+### v2.0.0 (2025-09-21) - Cloud-First Multi-User Platform
 **Major Features:**
 - 🏷️ **Tag System**: Complete tag management with color-coded labels
   - Create, edit, and delete tags with custom colors

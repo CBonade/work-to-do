@@ -5,6 +5,25 @@ All notable changes to Odd Jobs will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-01-25
+
+### Added
+- Touch-friendly up/down arrow reordering for mobile (replaces drag-and-drop)
+- Consolidated edit/delete actions in mobile dropdown menu
+- Responsive design with desktop-only/mobile-only CSS classes
+- PNG icon generator tool for better Safari PWA compatibility
+
+### Changed
+- Mobile logo sizing reduced for better fit on small screens
+- App name shortened to "Odd Jobs" for better home screen display
+- Done items on mobile now only show undo button (simplified UI)
+
+### Fixed
+- Mobile drag-and-drop interference with touch scrolling
+- Todo items overlapping text and icons on mobile screens
+
+---
+
 ## [2.0.0] - 2025-09-21
 
 ### 🎉 Major Release: Cloud-First Multi-User Platform
