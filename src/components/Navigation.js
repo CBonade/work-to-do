@@ -2,13 +2,27 @@ import React from 'react';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import WorkIcon from '@mui/icons-material/Work';
 import HomeIcon from '@mui/icons-material/Home';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navigation = ({ onOpenTagModal, currentContext, onContextChange }) => {
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
   return (
     <nav className="navigation">
       <div className="nav-content">
         <div className="nav-brand">
-          <h1>My To-Do App</h1>
+          <div className="nav-logo">
+            <span className="nav-logo-icon">🎯</span>
+            <h1>Odd Jobs</h1>
+          </div>
         </div>
 
         <div className="nav-center">
@@ -41,6 +55,28 @@ const Navigation = ({ onOpenTagModal, currentContext, onContextChange }) => {
             >
               <LocalOfferIcon sx={{ color: 'white', fontSize: 16, marginRight: 1 }} />
               Tags
+            </button>
+          </li>
+          {user && (
+            <li className="nav-item">
+              <div className="user-info">
+                <img
+                  src={user.user_metadata?.avatar_url}
+                  alt={user.user_metadata?.full_name || 'User'}
+                  className="user-avatar"
+                />
+                <span className="user-name">{user.user_metadata?.full_name || user.email}</span>
+              </div>
+            </li>
+          )}
+          <li className="nav-item">
+            <button
+              className="nav-button"
+              onClick={handleSignOut}
+              title="Sign Out"
+            >
+              <LogoutIcon sx={{ color: 'white', fontSize: 16, marginRight: 1 }} />
+              Sign Out
             </button>
           </li>
         </ul>

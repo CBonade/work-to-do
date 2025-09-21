@@ -1,5 +1,5 @@
 {
-  "name": "todo-app",
+  "name": "odd-jobs",
   "version": "2.0.0",
   "private": true,
   "homepage": "https://cbonade.github.io/work-to-do",
@@ -11,6 +11,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
+    "@supabase/supabase-js": "^2.57.4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",

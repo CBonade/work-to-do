@@ -18,36 +18,29 @@ import TodoItem from './components/TodoItem';
 import AddTodo from './components/AddTodo';
 import TagModal from './components/TagModal';
 import EditTodoModal from './components/EditTodoModal';
+import LoginPage from './components/LoginPage';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { useAuth } from './contexts/AuthContext';
+import { todoService, tagService } from './services/todoService';
 import './App.css';
 
 function App() {
+  const { user, loading } = useAuth();
   const [currentContext, setCurrentContext] = useState('work');
 
-  // Work context state
-  const [workTodos, setWorkTodos] = useState([]);
-  const [workDoneTodos, setWorkDoneTodos] = useState([]);
-  const [workTags, setWorkTags] = useState([]);
-
-  // Personal context state
-  const [personalTodos, setPersonalTodos] = useState([]);
-  const [personalDoneTodos, setPersonalDoneTodos] = useState([]);
-  const [personalTags, setPersonalTags] = useState([]);
+  // Data state
+  const [todos, setTodos] = useState([]);
+  const [doneTodos, setDoneTodos] = useState([]);
+  const [tags, setTags] = useState([]);
 
   // UI state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [editTodo, setEditTodo] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDoneSectionCollapsed, setIsDoneSectionCollapsed] = useState(true);
-
-  // Current context data (computed)
-  const todos = currentContext === 'work' ? workTodos : personalTodos;
-  const doneTodos = currentContext === 'work' ? workDoneTodos : personalDoneTodos;
-  const tags = currentContext === 'work' ? workTags : personalTags;
-  const setTodos = currentContext === 'work' ? setWorkTodos : setPersonalTodos;
-  const setDoneTodos = currentContext === 'work' ? setWorkDoneTodos : setPersonalDoneTodos;
-  const setTags = currentContext === 'work' ? setWorkTags : setPersonalTags;
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMigrated, setHasMigrated] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -56,159 +49,189 @@ function App() {
     })
   );
 
-  // Load data on mount
+  // Load data when user changes or context changes
   useEffect(() => {
-    const savedContext = localStorage.getItem('currentContext');
-    if (savedContext) {
-      setCurrentContext(savedContext);
-    }
+    if (user && !loading) {
+      loadData();
 
-    // Load work data
-    const savedWorkTodos = localStorage.getItem('work_todos');
-    const savedWorkDoneTodos = localStorage.getItem('work_doneTodos');
-    const savedWorkTags = localStorage.getItem('work_tags');
-
-    if (savedWorkTodos) {
-      setWorkTodos(JSON.parse(savedWorkTodos));
-    }
-    if (savedWorkDoneTodos) {
-      setWorkDoneTodos(JSON.parse(savedWorkDoneTodos));
-    }
-    if (savedWorkTags) {
-      setWorkTags(JSON.parse(savedWorkTags));
-    }
-
-    // Load personal data
-    const savedPersonalTodos = localStorage.getItem('personal_todos');
-    const savedPersonalDoneTodos = localStorage.getItem('personal_doneTodos');
-    const savedPersonalTags = localStorage.getItem('personal_tags');
-
-    if (savedPersonalTodos) {
-      setPersonalTodos(JSON.parse(savedPersonalTodos));
-    }
-    if (savedPersonalDoneTodos) {
-      setPersonalDoneTodos(JSON.parse(savedPersonalDoneTodos));
-    }
-    if (savedPersonalTags) {
-      setPersonalTags(JSON.parse(savedPersonalTags));
-    }
-
-    // Migrate existing data to work context if no context-specific data exists
-    if (!savedWorkTodos && !savedPersonalTodos) {
-      const legacyTodos = localStorage.getItem('todos');
-      const legacyDoneTodos = localStorage.getItem('doneTodos');
-      const legacyTags = localStorage.getItem('tags');
-
-      if (legacyTodos) {
-        setWorkTodos(JSON.parse(legacyTodos));
-      }
-      if (legacyDoneTodos) {
-        setWorkDoneTodos(JSON.parse(legacyDoneTodos));
-      }
-      if (legacyTags) {
-        setWorkTags(JSON.parse(legacyTags));
+      // Check if we need to migrate localStorage data
+      if (!hasMigrated) {
+        migrateLocalStorageData();
+        setHasMigrated(true);
       }
     }
-  }, []);
+  }, [user, currentContext, loading]);
 
-  // Save context
+  // Save current context to localStorage
   useEffect(() => {
-    localStorage.setItem('currentContext', currentContext);
-  }, [currentContext]);
+    if (user) {
+      localStorage.setItem('currentContext', currentContext);
+    }
+  }, [currentContext, user]);
 
-  // Save work data
+  // Load current context from localStorage
   useEffect(() => {
-    localStorage.setItem('work_todos', JSON.stringify(workTodos));
-  }, [workTodos]);
+    if (user) {
+      const savedContext = localStorage.getItem('currentContext');
+      if (savedContext && (savedContext === 'work' || savedContext === 'personal')) {
+        setCurrentContext(savedContext);
+      }
+    }
+  }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem('work_doneTodos', JSON.stringify(workDoneTodos));
-  }, [workDoneTodos]);
+  const loadData = async () => {
+    if (!user) return;
 
-  useEffect(() => {
-    localStorage.setItem('work_tags', JSON.stringify(workTags));
-  }, [workTags]);
+    setIsLoading(true);
+    try {
+      const [todosData, doneTodosData, tagsData] = await Promise.all([
+        todoService.getTodos(user.id, currentContext),
+        todoService.getCompletedTodos(user.id, currentContext),
+        tagService.getTags(user.id, currentContext)
+      ]);
 
-  // Save personal data
-  useEffect(() => {
-    localStorage.setItem('personal_todos', JSON.stringify(personalTodos));
-  }, [personalTodos]);
-
-  useEffect(() => {
-    localStorage.setItem('personal_doneTodos', JSON.stringify(personalDoneTodos));
-  }, [personalDoneTodos]);
-
-  useEffect(() => {
-    localStorage.setItem('personal_tags', JSON.stringify(personalTags));
-  }, [personalTags]);
-
-  const addTodo = (todoData) => {
-    const newTodo = {
-      id: Date.now().toString(),
-      text: typeof todoData === 'string' ? todoData.trim() : todoData.text,
-      tags: typeof todoData === 'object' ? todoData.tags || [] : [],
-      completed: false,
-    };
-    setTodos([...todos, newTodo]);
-  };
-
-  const markTodoDone = (id) => {
-    const todo = todos.find(t => t.id === id);
-    if (todo) {
-      setTodos(todos.filter(t => t.id !== id));
-      setDoneTodos([...doneTodos, {
-        ...todo,
-        completed: true,
-        completedDate: new Date().toISOString()
-      }]);
+      setTodos(todosData);
+      setDoneTodos(doneTodosData);
+      setTags(tagsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const markTodoUndone = (id) => {
-    const todo = doneTodos.find(t => t.id === id);
-    if (todo) {
-      setDoneTodos(doneTodos.filter(t => t.id !== id));
-      const { completedDate, ...todoWithoutDate } = todo;
-      setTodos([...todos, { ...todoWithoutDate, completed: false }]);
+  const migrateLocalStorageData = async () => {
+    if (!user) return;
+
+    try {
+      // Check if user already has data in Supabase
+      const existingTodos = await todoService.getTodos(user.id, 'work');
+      const existingTags = await tagService.getTags(user.id, 'work');
+
+      if (existingTodos.length > 0 || existingTags.length > 0) {
+        // User already has data, skip migration
+        return;
+      }
+
+      // Migrate localStorage data to work context
+      const legacyTodos = JSON.parse(localStorage.getItem('work_todos') || localStorage.getItem('todos') || '[]');
+      const legacyDoneTodos = JSON.parse(localStorage.getItem('work_doneTodos') || localStorage.getItem('doneTodos') || '[]');
+      const legacyTags = JSON.parse(localStorage.getItem('work_tags') || localStorage.getItem('tags') || '[]');
+
+      if (legacyTodos.length > 0 || legacyDoneTodos.length > 0 || legacyTags.length > 0) {
+        console.log('Migrating localStorage data to Supabase...');
+
+        // Migrate tags first (todos reference them)
+        if (legacyTags.length > 0) {
+          await tagService.bulkCreateTags(user.id, 'work', legacyTags);
+        }
+
+        // Migrate active todos
+        if (legacyTodos.length > 0) {
+          await todoService.bulkCreateTodos(user.id, 'work', legacyTodos);
+        }
+
+        // Migrate completed todos
+        if (legacyDoneTodos.length > 0) {
+          await todoService.bulkCreateTodos(user.id, 'work', legacyDoneTodos);
+        }
+
+        console.log('Migration complete!');
+
+        // Reload data to show migrated items
+        await loadData();
+      }
+    } catch (error) {
+      console.error('Error migrating data:', error);
     }
   };
 
-  const deleteTodo = (id, isDone = false) => {
-    if (isDone) {
-      setDoneTodos(doneTodos.filter(t => t.id !== id));
-    } else {
-      setTodos(todos.filter(t => t.id !== id));
+  const addTodo = async (todoData) => {
+    if (!user) return;
+
+    try {
+      const newTodo = await todoService.createTodo(user.id, currentContext, todoData);
+      setTodos(prev => [...prev, newTodo]);
+    } catch (error) {
+      console.error('Error adding todo:', error);
     }
   };
 
-  function handleDragEnd(event) {
+  const markTodoDone = async (id) => {
+    try {
+      const updatedTodo = await todoService.markTodoCompleted(id);
+      setTodos(prev => prev.filter(t => t.id !== id));
+      setDoneTodos(prev => [...prev, updatedTodo]);
+    } catch (error) {
+      console.error('Error marking todo done:', error);
+    }
+  };
+
+  const markTodoUndone = async (id) => {
+    try {
+      const updatedTodo = await todoService.markTodoUncompleted(id);
+      setDoneTodos(prev => prev.filter(t => t.id !== id));
+      setTodos(prev => [...prev, updatedTodo]);
+    } catch (error) {
+      console.error('Error marking todo undone:', error);
+    }
+  };
+
+  const deleteTodo = async (id) => {
+    try {
+      await todoService.deleteTodo(id);
+      setTodos(prev => prev.filter(t => t.id !== id));
+      setDoneTodos(prev => prev.filter(t => t.id !== id));
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+    }
+  };
+
+  const handleDragEnd = async (event) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      setTodos((items) => {
-        const oldIndex = items.findIndex(item => item.id === active.id);
-        const newIndex = items.findIndex(item => item.id === over.id);
+      const oldIndex = todos.findIndex(item => item.id === active.id);
+      const newIndex = todos.findIndex(item => item.id === over.id);
 
-        return arrayMove(items, oldIndex, newIndex);
-      });
+      const newTodos = arrayMove(todos, oldIndex, newIndex);
+      setTodos(newTodos);
+
+      // TODO: If you want to persist the order, you could add an 'order' field to the database
     }
-  }
-
-  const addTag = (tag) => {
-    setTags([...tags, tag]);
   };
 
-  const deleteTag = (tagId) => {
-    setTags(tags.filter(tag => tag.id !== tagId));
-    // Remove the tag from all todos
-    setTodos(todos.map(todo => ({
-      ...todo,
-      tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
-    })));
-    setDoneTodos(doneTodos.map(todo => ({
-      ...todo,
-      tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
-    })));
+  const addTag = async (tagData) => {
+    if (!user) return;
+
+    try {
+      const newTag = await tagService.createTag(user.id, currentContext, tagData);
+      setTags(prev => [...prev, newTag]);
+    } catch (error) {
+      console.error('Error adding tag:', error);
+      if (error.message?.includes('duplicate key')) {
+        alert('A tag with this name already exists in this context.');
+      }
+    }
+  };
+
+  const deleteTag = async (tagId) => {
+    try {
+      await tagService.deleteTag(tagId);
+      setTags(prev => prev.filter(tag => tag.id !== tagId));
+
+      // Remove tag from todos and doneTodos in local state
+      setTodos(prev => prev.map(todo => ({
+        ...todo,
+        tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
+      })));
+      setDoneTodos(prev => prev.map(todo => ({
+        ...todo,
+        tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
+      })));
+    } catch (error) {
+      console.error('Error deleting tag:', error);
+    }
   };
 
   const handleEditTodo = (todo) => {
@@ -216,15 +239,24 @@ function App() {
     setIsEditModalOpen(true);
   };
 
-  const saveTodoEdit = (updatedTodo) => {
-    if (updatedTodo.completed) {
-      setDoneTodos(doneTodos.map(todo =>
-        todo.id === updatedTodo.id ? updatedTodo : todo
-      ));
-    } else {
-      setTodos(todos.map(todo =>
-        todo.id === updatedTodo.id ? updatedTodo : todo
-      ));
+  const saveTodoEdit = async (updatedTodo) => {
+    try {
+      const savedTodo = await todoService.updateTodo(updatedTodo.id, {
+        text: updatedTodo.text,
+        tags: updatedTodo.tags
+      });
+
+      if (savedTodo.completed) {
+        setDoneTodos(prev => prev.map(todo =>
+          todo.id === savedTodo.id ? savedTodo : todo
+        ));
+      } else {
+        setTodos(prev => prev.map(todo =>
+          todo.id === savedTodo.id ? savedTodo : todo
+        ));
+      }
+    } catch (error) {
+      console.error('Error updating todo:', error);
     }
   };
 
@@ -273,8 +305,8 @@ function App() {
     const groups = {};
 
     todos.forEach(todo => {
-      if (todo.completedDate) {
-        const date = new Date(todo.completedDate).toLocaleDateString();
+      if (todo.completed_date) {
+        const date = new Date(todo.completed_date).toLocaleDateString();
         if (!groups[date]) {
           groups[date] = [];
         }
@@ -293,6 +325,23 @@ function App() {
     }));
   };
 
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-content">
+          <h1>Odd Jobs</h1>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login page if not authenticated
+  if (!user) {
+    return <LoginPage />;
+  }
+
   return (
     <div className="App">
       <Navigation
@@ -303,6 +352,12 @@ function App() {
 
       <header className="App-header">
         <AddTodo onAddTodo={addTodo} tags={tags} />
+
+        {isLoading && (
+          <div className="loading-indicator">
+            <p>Loading your todos...</p>
+          </div>
+        )}
 
         <div className="todo-sections">
           <div className="todo-section">
@@ -365,7 +420,7 @@ function App() {
                           key={todo.id}
                           todo={todo}
                           onMarkDone={markTodoUndone}
-                          onDelete={(id) => deleteTodo(id, true)}
+                          onDelete={deleteTodo}
                           onEdit={handleEditTodo}
                           isDone={true}
                           isDraggable={false}
