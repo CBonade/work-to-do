@@ -335,7 +335,7 @@
   }
 
   .nav-brand h1 {
-    font-size: 0.9rem;
+    font-size: 0.65rem;
   }
 
   .nav-logo-icon {
@@ -353,7 +353,7 @@
   }
 
   .nav-brand h1 {
-    font-size: 0.8rem;
+    font-size: 0.55rem;
   }
 
   .nav-logo-icon {
@@ -644,7 +644,12 @@
 
 .todo-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+}
+
+.desktop-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .edit-btn {
@@ -1164,26 +1169,27 @@
 .mobile-reorder {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-right: 8px;
+  gap: 4px;
+  margin-right: 12px;
 }
 
 .reorder-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
   color: #14b8a6;
   cursor: pointer;
-  padding: 2px;
-  border-radius: 3px;
+  padding: 4px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 16px;
+  width: 32px;
+  height: 28px;
+  transition: background-color 0.2s;
 }
 
 .reorder-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .reorder-btn:disabled {
@@ -1191,14 +1197,27 @@
   cursor: not-allowed;
 }
 
+.reorder-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 /* Mobile actions menu */
 .mobile-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
 }
 
 .actions-menu-container {
   position: relative;
+}
+
+.menu-btn {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
 }
 
 .actions-dropdown {

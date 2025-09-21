@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   useSortable,
 } from '@dnd-kit/sortable';
@@ -28,6 +28,7 @@ const TodoItem = ({
   canMoveDown = false
 }) => {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const menuRef = useRef(null);
 
   const {
     attributes,
@@ -75,6 +76,25 @@ const TodoItem = ({
     setShowActionsMenu(false);
     action();
   };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowActionsMenu(false);
+      }
+    };
+
+    if (showActionsMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showActionsMenu]);
 
   return (
     <div
@@ -195,7 +215,7 @@ const TodoItem = ({
               >
                 <CheckIcon sx={{ color: 'white', fontSize: 16 }} />
               </button>
-              <div className="actions-menu-container">
+              <div className="actions-menu-container" ref={menuRef}>
                 <button
                   className="action-btn menu-btn"
                   onClick={handleActionsMenuToggle}
