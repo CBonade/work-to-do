@@ -335,11 +335,11 @@
   }
 
   .nav-brand h1 {
-    font-size: 0.65rem;
+    font-size: 0.45rem;
   }
 
   .nav-logo-icon {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 }
 
@@ -353,11 +353,11 @@
   }
 
   .nav-brand h1 {
-    font-size: 0.55rem;
+    font-size: 0.4rem;
   }
 
   .nav-logo-icon {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 
   .context-tab {
@@ -1169,7 +1169,7 @@
 .mobile-reorder {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   margin-right: 12px;
 }
 
