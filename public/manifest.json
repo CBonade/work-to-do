@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Odd Jobs",
+  "name": "Odd Jobs - Task Manager by Oddball",
+  "version": "2.0.1",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,8 +19,11 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/work-to-do/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#14b8a6",
+  "background_color": "#1a1a1a",
+  "orientation": "portrait-primary",
+  "scope": "/work-to-do/",
+  "categories": ["productivity", "utilities"]
 }
