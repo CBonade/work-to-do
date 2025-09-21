@@ -1166,8 +1166,8 @@
 }
 
 /* Mobile reorder buttons */
-.mobile-reorder {
-  display: flex;
+.mobile-only.mobile-reorder {
+  display: flex !important;
   flex-direction: column;
   gap: 16px;
   margin-right: 12px;
