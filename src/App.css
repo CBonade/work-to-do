@@ -335,7 +335,7 @@
   }
 
   .nav-brand h1 {
-    font-size: 0.45rem !important;
+    font-size: 0.8rem !important;
   }
 
   .nav-logo-icon {
@@ -353,7 +353,7 @@
   }
 
   .nav-brand h1 {
-    font-size: 0.4rem !important;
+    font-size: 0.8rem !important;
   }
 
   .nav-logo-icon {
@@ -362,6 +362,17 @@
 
   .context-tab {
     padding: 6px 8px;
+  }
+}
+
+/* Extra small screens (iPhone mini and similar) */
+@media (max-width: 350px) {
+  .nav-logo-icon {
+    display: none;
+  }
+
+  .nav-brand h1 {
+    font-size: 0.75rem !important;
   }
 }
 
