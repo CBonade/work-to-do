@@ -38,10 +38,15 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signInWithGitHub = async () => {
+    // For GitHub Pages deployment, we need to include the full path
+    const redirectUrl = process.env.NODE_ENV === 'production'
+      ? `${window.location.origin}/work-to-do/`
+      : window.location.origin;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: window.location.origin
+        redirectTo: redirectUrl
       }
     });
     if (error) {
