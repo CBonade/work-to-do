@@ -335,11 +335,11 @@
   }
 
   .nav-brand h1 {
-    font-size: 0.45rem;
+    font-size: 0.45rem !important;
   }
 
   .nav-logo-icon {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
   }
 }
 
@@ -353,11 +353,11 @@
   }
 
   .nav-brand h1 {
-    font-size: 0.4rem;
+    font-size: 0.4rem !important;
   }
 
   .nav-logo-icon {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
 
   .context-tab {
@@ -1202,8 +1202,8 @@
 }
 
 /* Mobile actions menu */
-.mobile-actions {
-  display: flex;
+.mobile-only.mobile-actions {
+  display: flex !important;
   gap: 8px;
 }
 
