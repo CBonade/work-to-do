@@ -201,6 +201,22 @@ function App() {
     }
   };
 
+  const handleMoveUp = (todoId) => {
+    const currentIndex = todos.findIndex(item => item.id === todoId);
+    if (currentIndex > 0) {
+      const newTodos = arrayMove(todos, currentIndex, currentIndex - 1);
+      setTodos(newTodos);
+    }
+  };
+
+  const handleMoveDown = (todoId) => {
+    const currentIndex = todos.findIndex(item => item.id === todoId);
+    if (currentIndex < todos.length - 1) {
+      const newTodos = arrayMove(todos, currentIndex, currentIndex + 1);
+      setTodos(newTodos);
+    }
+  };
+
   const addTag = async (tagData) => {
     if (!user) return;
 
@@ -377,14 +393,18 @@ function App() {
                 strategy={verticalListSortingStrategy}
               >
                 <div className="todo-list">
-                  {todos.map((todo) => (
+                  {todos.map((todo, index) => (
                     <TodoItem
                       key={todo.id}
                       todo={todo}
                       onMarkDone={markTodoDone}
                       onDelete={deleteTodo}
                       onEdit={handleEditTodo}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
                       isDraggable={true}
+                      canMoveUp={index > 0}
+                      canMoveDown={index < todos.length - 1}
                     />
                   ))}
                 </div>

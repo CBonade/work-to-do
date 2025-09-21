@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   useSortable,
 } from '@dnd-kit/sortable';
@@ -10,8 +10,25 @@ import CheckIcon from '@mui/icons-material/Check';
 import UndoIcon from '@mui/icons-material/Undo';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CloseIcon from '@mui/icons-material/Close';
 
-const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDraggable = false }) => {
+const TodoItem = ({
+  todo,
+  onMarkDone,
+  onDelete,
+  onEdit,
+  onMoveUp,
+  onMoveDown,
+  isDone = false,
+  isDraggable = false,
+  canMoveUp = false,
+  canMoveDown = false
+}) => {
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -50,6 +67,15 @@ const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDragga
     });
   };
 
+  const handleActionsMenuToggle = () => {
+    setShowActionsMenu(!showActionsMenu);
+  };
+
+  const handleActionClick = (action) => {
+    setShowActionsMenu(false);
+    action();
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -57,18 +83,42 @@ const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDragga
       className={`todo-item ${isDone ? 'done' : ''} ${isDragging ? 'dragging' : ''}`}
     >
       <div className="todo-content">
+        {/* Desktop: Drag handle, Mobile: Reorder arrows */}
         {isDraggable && (
-          <div className="drag-handle" {...attributes} {...listeners}>
-            <DragIndicatorIcon sx={{ color: 'white', fontSize: 18 }} />
-          </div>
+          <>
+            <div className="drag-handle desktop-only" {...attributes} {...listeners}>
+              <DragIndicatorIcon sx={{ color: 'white', fontSize: 18 }} />
+            </div>
+            <div className="mobile-reorder mobile-only">
+              {canMoveUp && (
+                <button
+                  className="reorder-btn"
+                  onClick={() => onMoveUp(todo.id)}
+                  title="Move up"
+                >
+                  <ArrowUpwardIcon sx={{ fontSize: 14 }} />
+                </button>
+              )}
+              {canMoveDown && (
+                <button
+                  className="reorder-btn"
+                  onClick={() => onMoveDown(todo.id)}
+                  title="Move down"
+                >
+                  <ArrowDownwardIcon sx={{ fontSize: 14 }} />
+                </button>
+              )}
+            </div>
+          </>
         )}
+
         <div className="todo-content-wrapper">
           <span className={`todo-text ${isDone ? 'strikethrough' : ''}`}>
             {renderTextWithLinks(todo.text)}
           </span>
-          {isDone && todo.completedDate && (
+          {isDone && todo.completed_date && (
             <div className="completion-date">
-              Completed: {new Date(todo.completedDate).toLocaleDateString()}
+              Completed: {new Date(todo.completed_date).toLocaleDateString()}
             </div>
           )}
           {todo.tags && todo.tags.length > 0 && (
@@ -89,32 +139,96 @@ const TodoItem = ({ todo, onMarkDone, onDelete, onEdit, isDone = false, isDragga
           )}
         </div>
       </div>
+
       <div className="todo-actions">
-        <button
-          className="action-btn edit-btn"
-          onClick={() => onEdit(todo)}
-          title="Edit"
-        >
-          <EditIcon sx={{ color: 'white', fontSize: 16 }} />
-        </button>
-        <button
-          className={`action-btn ${isDone ? 'undo-btn' : 'done-btn'}`}
-          onClick={() => onMarkDone(todo.id)}
-          title={isDone ? 'Mark as undone' : 'Mark as done'}
-        >
-          {isDone ? (
-            <UndoIcon sx={{ color: 'white', fontSize: 16 }} />
-          ) : (
-            <CheckIcon sx={{ color: 'white', fontSize: 16 }} />
+        {/* Desktop: Individual buttons */}
+        <div className="desktop-actions desktop-only">
+          {!isDone && (
+            <button
+              className="action-btn edit-btn"
+              onClick={() => onEdit(todo)}
+              title="Edit"
+            >
+              <EditIcon sx={{ color: 'white', fontSize: 16 }} />
+            </button>
           )}
-        </button>
-        <button
-          className="action-btn delete-btn"
-          onClick={() => onDelete(todo.id)}
-          title="Delete"
-        >
-          <DeleteIcon sx={{ color: 'white', fontSize: 16 }} />
-        </button>
+          <button
+            className={`action-btn ${isDone ? 'undo-btn' : 'done-btn'}`}
+            onClick={() => onMarkDone(todo.id)}
+            title={isDone ? 'Mark as undone' : 'Mark as done'}
+          >
+            {isDone ? (
+              <UndoIcon sx={{ color: 'white', fontSize: 16 }} />
+            ) : (
+              <CheckIcon sx={{ color: 'white', fontSize: 16 }} />
+            )}
+          </button>
+          {!isDone && (
+            <button
+              className="action-btn delete-btn"
+              onClick={() => onDelete(todo.id)}
+              title="Delete"
+            >
+              <DeleteIcon sx={{ color: 'white', fontSize: 16 }} />
+            </button>
+          )}
+        </div>
+
+        {/* Mobile: Compact actions */}
+        <div className="mobile-actions mobile-only">
+          {isDone ? (
+            // Done items: Only undo button
+            <button
+              className="action-btn undo-btn"
+              onClick={() => onMarkDone(todo.id)}
+              title="Mark as undone"
+            >
+              <UndoIcon sx={{ color: 'white', fontSize: 16 }} />
+            </button>
+          ) : (
+            // Active items: Done + menu
+            <>
+              <button
+                className="action-btn done-btn"
+                onClick={() => onMarkDone(todo.id)}
+                title="Mark as done"
+              >
+                <CheckIcon sx={{ color: 'white', fontSize: 16 }} />
+              </button>
+              <div className="actions-menu-container">
+                <button
+                  className="action-btn menu-btn"
+                  onClick={handleActionsMenuToggle}
+                  title="More actions"
+                >
+                  {showActionsMenu ? (
+                    <CloseIcon sx={{ color: 'white', fontSize: 16 }} />
+                  ) : (
+                    <MoreVertIcon sx={{ color: 'white', fontSize: 16 }} />
+                  )}
+                </button>
+                {showActionsMenu && (
+                  <div className="actions-dropdown">
+                    <button
+                      className="dropdown-action"
+                      onClick={() => handleActionClick(() => onEdit(todo))}
+                    >
+                      <EditIcon sx={{ fontSize: 16, marginRight: 1 }} />
+                      Edit
+                    </button>
+                    <button
+                      className="dropdown-action delete-action"
+                      onClick={() => handleActionClick(() => onDelete(todo.id))}
+                    >
+                      <DeleteIcon sx={{ fontSize: 16, marginRight: 1 }} />
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
