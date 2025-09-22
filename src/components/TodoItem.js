@@ -161,41 +161,8 @@ const TodoItem = ({
       </div>
 
       <div className="todo-actions">
-        {/* Desktop: Individual buttons */}
-        <div className="desktop-actions desktop-only">
-          {!isDone && (
-            <button
-              className="action-btn edit-btn"
-              onClick={() => onEdit(todo)}
-              title="Edit"
-            >
-              <EditIcon sx={{ color: 'white', fontSize: 16 }} />
-            </button>
-          )}
-          <button
-            className={`action-btn ${isDone ? 'undo-btn' : 'done-btn'}`}
-            onClick={() => onMarkDone(todo.id)}
-            title={isDone ? 'Mark as undone' : 'Mark as done'}
-          >
-            {isDone ? (
-              <UndoIcon sx={{ color: 'white', fontSize: 16 }} />
-            ) : (
-              <CheckIcon sx={{ color: 'white', fontSize: 16 }} />
-            )}
-          </button>
-          {!isDone && (
-            <button
-              className="action-btn delete-btn"
-              onClick={() => onDelete(todo.id)}
-              title="Delete"
-            >
-              <DeleteIcon sx={{ color: 'white', fontSize: 16 }} />
-            </button>
-          )}
-        </div>
-
-        {/* Mobile: Compact actions */}
-        <div className="mobile-actions mobile-only">
+        {/* Unified actions for all screen sizes */}
+        <div className="unified-actions">
           {isDone ? (
             // Done items: Only undo button
             <button

@@ -1212,9 +1212,9 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Mobile actions menu */
-.mobile-only.mobile-actions {
-  display: flex !important;
+/* Unified actions for all screen sizes */
+.unified-actions {
+  display: flex;
   gap: 8px;
 }
 
