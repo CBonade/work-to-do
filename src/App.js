@@ -47,7 +47,7 @@ function App() {
   const [isDoneSectionCollapsed, setIsDoneSectionCollapsed] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMigrated, setHasMigrated] = useState(false);
-  const [animatingTodoIds, setAnimatingTodoIds] = useState(new Set());
+  const [swappingAnimation, setSwappingAnimation] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -247,36 +247,42 @@ function App() {
   const handleMoveUp = async (todoId) => {
     const currentIndex = todos.findIndex(item => item.id === todoId);
     if (currentIndex > 0) {
-      // Animate the moving item
-      animateReorder(todoId);
+      const targetTodo = todos[currentIndex - 1];
 
-      const newTodos = arrayMove(todos, currentIndex, currentIndex - 1);
-      setTodos(newTodos);
+      // Start swap animation
+      animateSwap(todoId, targetTodo.id, 'up');
 
-      // Persist the new order to database
-      try {
-        await todoService.updateTodoOrder(newTodos);
-      } catch (error) {
-        console.error('Error saving todo order:', error);
-      }
+      // Delay the actual state update to let animation start
+      setTimeout(() => {
+        const newTodos = arrayMove(todos, currentIndex, currentIndex - 1);
+        setTodos(newTodos);
+
+        // Persist the new order to database
+        todoService.updateTodoOrder(newTodos).catch(error => {
+          console.error('Error saving todo order:', error);
+        });
+      }, 50); // Small delay to ensure animation starts
     }
   };
 
   const handleMoveDown = async (todoId) => {
     const currentIndex = todos.findIndex(item => item.id === todoId);
     if (currentIndex < todos.length - 1) {
-      // Animate the moving item
-      animateReorder(todoId);
+      const targetTodo = todos[currentIndex + 1];
 
-      const newTodos = arrayMove(todos, currentIndex, currentIndex + 1);
-      setTodos(newTodos);
+      // Start swap animation
+      animateSwap(todoId, targetTodo.id, 'down');
 
-      // Persist the new order to database
-      try {
-        await todoService.updateTodoOrder(newTodos);
-      } catch (error) {
-        console.error('Error saving todo order:', error);
-      }
+      // Delay the actual state update to let animation start
+      setTimeout(() => {
+        const newTodos = arrayMove(todos, currentIndex, currentIndex + 1);
+        setTodos(newTodos);
+
+        // Persist the new order to database
+        todoService.updateTodoOrder(newTodos).catch(error => {
+          console.error('Error saving todo order:', error);
+        });
+      }, 50); // Small delay to ensure animation starts
     }
   };
 
@@ -454,16 +460,17 @@ function App() {
     return 0; // Normal priority
   };
 
-  // Animation helper function
-  const animateReorder = (todoId) => {
-    setAnimatingTodoIds(prev => new Set(prev).add(todoId));
+  // Animation helper function for swapping
+  const animateSwap = (movingId, targetId, direction) => {
+    setSwappingAnimation({
+      movingId,
+      targetId,
+      direction // 'up' or 'down'
+    });
+
     setTimeout(() => {
-      setAnimatingTodoIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(todoId);
-        return newSet;
-      });
-    }, 600); // Match the CSS transition duration
+      setSwappingAnimation(null);
+    }, 400); // Match the CSS animation duration
   };
 
   // Sort todos with deadline-based pinning
@@ -626,7 +633,10 @@ function App() {
                       isDraggable={true}
                       canMoveUp={index > 0}
                       canMoveDown={index < todos.length - 1}
-                      isAnimating={animatingTodoIds.has(todo.id)}
+                      swappingState={swappingAnimation && (
+                        todo.id === swappingAnimation.movingId ? `swapping-${swappingAnimation.direction}` :
+                        todo.id === swappingAnimation.targetId ? 'swapping-target' : null
+                      )}
                     />
                   ))}
                 </div>

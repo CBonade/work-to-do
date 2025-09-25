@@ -53,7 +53,7 @@ const TodoItem = ({
   isDraggable = false,
   canMoveUp = false,
   canMoveDown = false,
-  isAnimating = false
+  swappingState = null
 }) => {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const menuRef = useRef(null);
@@ -128,7 +128,7 @@ const TodoItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`todo-item ${isDone ? 'done' : ''} ${isDragging ? 'dragging' : ''} ${isAnimating ? 'moving' : ''} ${getDeadlineClass(todo.deadline)}`}
+      className={`todo-item ${isDone ? 'done' : ''} ${isDragging ? 'dragging' : ''} ${swappingState || ''} ${getDeadlineClass(todo.deadline)}`}
     >
       <div className="todo-content">
         {/* Desktop: Drag handle, Mobile: Reorder arrows */}
