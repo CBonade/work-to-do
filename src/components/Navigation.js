@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import WorkIcon from '@mui/icons-material/Work';
 import HomeIcon from '@mui/icons-material/Home';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -8,7 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useAuth } from '../contexts/AuthContext';
 
-const Navigation = ({ onOpenTagModal, currentContext, onContextChange }) => {
+const Navigation = ({ onOpenTagModal, onOpenWeeklyTaskModal, currentContext, onContextChange }) => {
   const { user, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -80,10 +81,31 @@ const Navigation = ({ onOpenTagModal, currentContext, onContextChange }) => {
           </div>
         </div>
 
-        {/* Right: User Menu */}
+        {/* Right: Desktop Menu + User Menu */}
         <div className="nav-right">
           {user && (
-            <div className="user-menu-container">
+            <>
+              {/* Desktop Menu Buttons */}
+              <div className="desktop-menu desktop-only">
+                <button
+                  className="desktop-menu-btn"
+                  onClick={() => onOpenTagModal()}
+                  title="Manage Tags"
+                >
+                  <LocalOfferIcon sx={{ fontSize: 16, marginRight: 1 }} />
+                  Tags
+                </button>
+                <button
+                  className="desktop-menu-btn"
+                  onClick={() => onOpenWeeklyTaskModal()}
+                  title="Weekly Tasks"
+                >
+                  <CalendarTodayIcon sx={{ fontSize: 16, marginRight: 1 }} />
+                  Weekly
+                </button>
+              </div>
+
+              <div className="user-menu-container">
               <button
                 className="user-menu-button"
                 onClick={toggleUserMenu}
@@ -122,6 +144,7 @@ const Navigation = ({ onOpenTagModal, currentContext, onContextChange }) => {
                 </div>
               )}
             </div>
+            </>
           )}
         </div>
 
@@ -150,7 +173,16 @@ const Navigation = ({ onOpenTagModal, currentContext, onContextChange }) => {
                   <LocalOfferIcon sx={{ fontSize: 20, marginRight: 2 }} />
                   Manage Tags
                 </button>
-                {/* Future menu items can be added here */}
+                <button
+                  className="menu-item"
+                  onClick={() => {
+                    onOpenWeeklyTaskModal();
+                    handleMenuItemClick();
+                  }}
+                >
+                  <CalendarTodayIcon sx={{ fontSize: 20, marginRight: 2 }} />
+                  Weekly Tasks
+                </button>
               </div>
             </div>
           </>

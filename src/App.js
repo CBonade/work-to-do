@@ -15,14 +15,17 @@ import {
 } from '@dnd-kit/sortable';
 import Navigation from './components/Navigation';
 import TodoItem from './components/TodoItem';
-import AddTodo from './components/AddTodo';
+import AddTodoModal from './components/AddTodoModal';
+import FloatingAddButton from './components/FloatingAddButton';
 import TagModal from './components/TagModal';
 import EditTodoModal from './components/EditTodoModal';
+import WeeklyTaskModal from './components/WeeklyTaskModal';
+import WeeklyTaskItem from './components/WeeklyTaskItem';
 import LoginPage from './components/LoginPage';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useAuth } from './contexts/AuthContext';
-import { todoService, tagService } from './services/todoService';
+import { todoService, tagService, weeklyTaskService } from './services/todoService';
 import './App.css';
 
 function App() {
@@ -33,14 +36,18 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [doneTodos, setDoneTodos] = useState([]);
   const [tags, setTags] = useState([]);
+  const [weeklyTasks, setWeeklyTasks] = useState([]);
 
   // UI state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isWeeklyTaskModalOpen, setIsWeeklyTaskModalOpen] = useState(false);
   const [editTodo, setEditTodo] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDoneSectionCollapsed, setIsDoneSectionCollapsed] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMigrated, setHasMigrated] = useState(false);
+  const [animatingTodoIds, setAnimatingTodoIds] = useState(new Set());
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -79,20 +86,51 @@ function App() {
     }
   }, [user]);
 
+  // Check for new day and reset weekly tasks if needed
+  useEffect(() => {
+    if (!user || weeklyTasks.length === 0) return;
+
+    const checkForNewDay = async () => {
+      const today = new Date().toDateString();
+      const lastResetKey = `lastWeeklyReset_${user.id}_${currentContext}`;
+      const lastReset = localStorage.getItem(lastResetKey);
+
+      if (lastReset !== today) {
+        // It's a new day, reset all weekly tasks
+        try {
+          await weeklyTaskService.resetWeeklyTasks(user.id, currentContext);
+          // Update local state
+          setWeeklyTasks(prev => prev.map(task => ({
+            ...task,
+            completed_this_week: false
+          })));
+          // Store today as the last reset date
+          localStorage.setItem(lastResetKey, today);
+        } catch (error) {
+          console.error('Error resetting weekly tasks:', error);
+        }
+      }
+    };
+
+    checkForNewDay();
+  }, [user, currentContext, weeklyTasks]);
+
   const loadData = async () => {
     if (!user) return;
 
     setIsLoading(true);
     try {
-      const [todosData, doneTodosData, tagsData] = await Promise.all([
+      const [todosData, doneTodosData, tagsData, weeklyTasksData] = await Promise.all([
         todoService.getTodos(user.id, currentContext),
         todoService.getCompletedTodos(user.id, currentContext),
-        tagService.getTags(user.id, currentContext)
+        tagService.getTags(user.id, currentContext),
+        weeklyTaskService.getWeeklyTasks(user.id, currentContext)
       ]);
 
-      setTodos(todosData);
+      setTodos(sortTodosWithDeadlines(todosData));
       setDoneTodos(doneTodosData);
       setTags(tagsData);
+      setWeeklyTasks(weeklyTasksData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -151,7 +189,7 @@ function App() {
 
     try {
       const newTodo = await todoService.createTodo(user.id, currentContext, todoData);
-      setTodos(prev => [...prev, newTodo]);
+      setTodos(prev => sortTodosWithDeadlines([...prev, newTodo]));
     } catch (error) {
       console.error('Error adding todo:', error);
     }
@@ -197,23 +235,48 @@ function App() {
       const newTodos = arrayMove(todos, oldIndex, newIndex);
       setTodos(newTodos);
 
-      // TODO: If you want to persist the order, you could add an 'order' field to the database
+      // Persist the new order to database
+      try {
+        await todoService.updateTodoOrder(newTodos);
+      } catch (error) {
+        console.error('Error saving todo order:', error);
+      }
     }
   };
 
-  const handleMoveUp = (todoId) => {
+  const handleMoveUp = async (todoId) => {
     const currentIndex = todos.findIndex(item => item.id === todoId);
     if (currentIndex > 0) {
+      // Animate the moving item
+      animateReorder(todoId);
+
       const newTodos = arrayMove(todos, currentIndex, currentIndex - 1);
       setTodos(newTodos);
+
+      // Persist the new order to database
+      try {
+        await todoService.updateTodoOrder(newTodos);
+      } catch (error) {
+        console.error('Error saving todo order:', error);
+      }
     }
   };
 
-  const handleMoveDown = (todoId) => {
+  const handleMoveDown = async (todoId) => {
     const currentIndex = todos.findIndex(item => item.id === todoId);
     if (currentIndex < todos.length - 1) {
+      // Animate the moving item
+      animateReorder(todoId);
+
       const newTodos = arrayMove(todos, currentIndex, currentIndex + 1);
       setTodos(newTodos);
+
+      // Persist the new order to database
+      try {
+        await todoService.updateTodoOrder(newTodos);
+      } catch (error) {
+        console.error('Error saving todo order:', error);
+      }
     }
   };
 
@@ -259,7 +322,8 @@ function App() {
     try {
       const savedTodo = await todoService.updateTodo(updatedTodo.id, {
         text: updatedTodo.text,
-        tags: updatedTodo.tags
+        tags: updatedTodo.tags,
+        deadline: updatedTodo.deadline
       });
 
       if (savedTodo.completed) {
@@ -267,8 +331,8 @@ function App() {
           todo.id === savedTodo.id ? savedTodo : todo
         ));
       } else {
-        setTodos(prev => prev.map(todo =>
-          todo.id === savedTodo.id ? savedTodo : todo
+        setTodos(prev => sortTodosWithDeadlines(
+          prev.map(todo => todo.id === savedTodo.id ? savedTodo : todo)
         ));
       }
     } catch (error) {
@@ -313,7 +377,121 @@ function App() {
     setCurrentContext(newContext);
     setIsTagModalOpen(false);
     setIsEditModalOpen(false);
+    setIsWeeklyTaskModalOpen(false);
     setEditTodo(null);
+  };
+
+  // Weekly task handlers
+  const addWeeklyTask = async (taskData) => {
+    if (!user) return;
+
+    try {
+      const newTask = await weeklyTaskService.createWeeklyTask(user.id, currentContext, taskData);
+      setWeeklyTasks(prev => [...prev, newTask]);
+    } catch (error) {
+      console.error('Error adding weekly task:', error);
+    }
+  };
+
+  const deleteWeeklyTask = async (taskId) => {
+    try {
+      await weeklyTaskService.deleteWeeklyTask(taskId);
+      setWeeklyTasks(prev => prev.filter(task => task.id !== taskId));
+    } catch (error) {
+      console.error('Error deleting weekly task:', error);
+    }
+  };
+
+  const markWeeklyTaskCompleted = async (taskId) => {
+    try {
+      const updatedTask = await weeklyTaskService.markWeeklyTaskCompleted(taskId);
+      setWeeklyTasks(prev => prev.map(task =>
+        task.id === taskId ? updatedTask : task
+      ));
+    } catch (error) {
+      console.error('Error marking weekly task completed:', error);
+    }
+  };
+
+  const markWeeklyTaskIncomplete = async (taskId) => {
+    try {
+      const updatedTask = await weeklyTaskService.markWeeklyTaskIncomplete(taskId);
+      setWeeklyTasks(prev => prev.map(task =>
+        task.id === taskId ? updatedTask : task
+      ));
+    } catch (error) {
+      console.error('Error marking weekly task incomplete:', error);
+    }
+  };
+
+  // Get current day of week (0 = Sunday, 1 = Monday, etc.) in ET timezone
+  const getCurrentDayOfWeek = () => {
+    const now = new Date();
+    // Use Intl.DateTimeFormat to properly handle EST/EDT
+    const etTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
+    return etTime.getDay();
+  };
+
+  // Get today's weekly tasks
+  const getTodaysWeeklyTasks = () => {
+    const today = getCurrentDayOfWeek();
+    return weeklyTasks.filter(task => task.day_of_week === today);
+  };
+
+  // Deadline utility functions
+  const getDeadlineUrgency = (deadline) => {
+    if (!deadline) return 0; // Normal priority
+
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const timeDiff = deadlineDate.getTime() - now.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    if (daysDiff < 0) return 4; // Overdue - highest priority
+    if (daysDiff <= 1) return 3; // Urgent (red) - high priority
+    if (daysDiff <= 3) return 2; // Warning (orange) - medium-high priority
+    if (daysDiff <= 7) return 1; // Caution (yellow) - medium priority
+    return 0; // Normal priority
+  };
+
+  // Animation helper function
+  const animateReorder = (todoId) => {
+    setAnimatingTodoIds(prev => new Set(prev).add(todoId));
+    setTimeout(() => {
+      setAnimatingTodoIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(todoId);
+        return newSet;
+      });
+    }, 600); // Match the CSS transition duration
+  };
+
+  // Sort todos with deadline-based pinning
+  const sortTodosWithDeadlines = (todos) => {
+    return [...todos].sort((a, b) => {
+      const aUrgency = getDeadlineUrgency(a.deadline);
+      const bUrgency = getDeadlineUrgency(b.deadline);
+
+      // Pin urgent and warning items (orange/red) to top
+      const aPinned = aUrgency >= 2; // Warning (orange) or higher
+      const bPinned = bUrgency >= 2;
+
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+
+      // Within pinned items, sort by urgency (most urgent first)
+      if (aPinned && bPinned) {
+        if (aUrgency !== bUrgency) return bUrgency - aUrgency;
+      }
+
+      // For same urgency level or non-pinned items, preserve sort_order
+      if (a.sort_order !== null && b.sort_order !== null) {
+        return a.sort_order - b.sort_order;
+      }
+
+      // Fallback to creation date
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
   };
 
   // Helper function to group done todos by completion date
@@ -362,26 +540,69 @@ function App() {
     <div className="App">
       <Navigation
         onOpenTagModal={() => setIsTagModalOpen(true)}
+        onOpenWeeklyTaskModal={() => setIsWeeklyTaskModalOpen(true)}
         currentContext={currentContext}
         onContextChange={handleContextChange}
       />
 
       <header className="App-header">
-        <AddTodo onAddTodo={addTodo} tags={tags} />
-
         {isLoading && (
           <div className="loading-indicator">
             <p>Loading your todos...</p>
           </div>
         )}
 
+        {/* Weekly Tasks Section - Today's Tasks */}
+        {getTodaysWeeklyTasks().length > 0 && (
+          <div className="weekly-tasks-section">
+            <div className="section-header">
+              <div className="section-header-left">
+                <h2>Today's Tasks ({getTodaysWeeklyTasks().length})</h2>
+                <span className="weekly-tasks-indicator">
+                  📅 {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][getCurrentDayOfWeek()]}
+                </span>
+              </div>
+              <div className="section-header-right desktop-only">
+                <button
+                  className="manage-weekly-btn"
+                  onClick={() => setIsWeeklyTaskModalOpen(true)}
+                  title="Manage weekly tasks"
+                >
+                  Manage
+                </button>
+              </div>
+            </div>
+            <div className="weekly-tasks-list">
+              {getTodaysWeeklyTasks().map((task) => (
+                <WeeklyTaskItem
+                  key={task.id}
+                  task={task}
+                  onMarkCompleted={markWeeklyTaskCompleted}
+                  onMarkIncomplete={markWeeklyTaskIncomplete}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="todo-sections">
           <div className="todo-section">
             <div className="section-header">
-              <h2>To Do ({todos.length})</h2>
-              <span className={`context-indicator context-${currentContext}`}>
-                {currentContext === 'work' ? '💼' : '🏠'} {currentContext.charAt(0).toUpperCase() + currentContext.slice(1)}
-              </span>
+              <div className="section-header-left">
+                <h2>To Do ({todos.length})</h2>
+                <span className={`context-indicator context-${currentContext}`}>
+                  {currentContext === 'work' ? '💼' : '🏠'} {currentContext.charAt(0).toUpperCase() + currentContext.slice(1)}
+                </span>
+              </div>
+              <div className="section-header-right desktop-only">
+                <button
+                  className="desktop-add-btn"
+                  onClick={() => setIsAddModalOpen(true)}
+                  title="Add new todo"
+                >
+                  Add
+                </button>
+              </div>
             </div>
             <DndContext
               sensors={sensors}
@@ -405,6 +626,7 @@ function App() {
                       isDraggable={true}
                       canMoveUp={index > 0}
                       canMoveDown={index < todos.length - 1}
+                      isAnimating={animatingTodoIds.has(todo.id)}
                     />
                   ))}
                 </div>
@@ -529,6 +751,21 @@ function App() {
         onDeleteTag={deleteTag}
       />
 
+      <WeeklyTaskModal
+        isOpen={isWeeklyTaskModalOpen}
+        onClose={() => setIsWeeklyTaskModalOpen(false)}
+        weeklyTasks={weeklyTasks}
+        onAddWeeklyTask={addWeeklyTask}
+        onDeleteWeeklyTask={deleteWeeklyTask}
+      />
+
+      <AddTodoModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddTodo={addTodo}
+        tags={tags}
+      />
+
       <EditTodoModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -536,6 +773,8 @@ function App() {
         tags={tags}
         onSave={saveTodoEdit}
       />
+
+      <FloatingAddButton onClick={() => setIsAddModalOpen(true)} />
     </div>
   );
 }

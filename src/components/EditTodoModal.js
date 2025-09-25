@@ -4,11 +4,13 @@ import CloseIcon from '@mui/icons-material/Close';
 const EditTodoModal = ({ isOpen, onClose, todo, tags, onSave }) => {
   const [todoText, setTodoText] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [deadline, setDeadline] = useState('');
 
   useEffect(() => {
     if (todo) {
       setTodoText(todo.text || '');
       setSelectedTags(todo.tags || []);
+      setDeadline(todo.deadline || '');
     }
   }, [todo]);
 
@@ -18,6 +20,7 @@ const EditTodoModal = ({ isOpen, onClose, todo, tags, onSave }) => {
       onSave({
         ...todo,
         text: todoText.trim(),
+        deadline: deadline || null,
         tags: selectedTags,
       });
       onClose();
@@ -65,6 +68,17 @@ const EditTodoModal = ({ isOpen, onClose, todo, tags, onSave }) => {
                 placeholder="Enter todo text..."
                 className="form-input"
                 autoFocus
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="deadlineEdit">Deadline (optional)</label>
+              <input
+                id="deadlineEdit"
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="deadline-input"
               />
             </div>
 

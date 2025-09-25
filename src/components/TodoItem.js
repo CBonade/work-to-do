@@ -15,6 +15,33 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CloseIcon from '@mui/icons-material/Close';
 
+// Utility functions for deadline calculations
+const getDeadlineStatus = (deadline) => {
+  if (!deadline) return null;
+
+  const now = new Date();
+  const deadlineDate = new Date(deadline);
+  const timeDiff = deadlineDate.getTime() - now.getTime();
+  const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+  if (daysDiff < 0) return 'overdue';
+  if (daysDiff <= 1) return 'urgent'; // Red - within 1 day
+  if (daysDiff <= 3) return 'warning'; // Orange - within 3 days
+  if (daysDiff <= 7) return 'caution'; // Yellow - within 1 week
+  return 'normal';
+};
+
+const getDeadlineClass = (deadline) => {
+  const status = getDeadlineStatus(deadline);
+  switch (status) {
+    case 'overdue': return 'deadline-overdue';
+    case 'urgent': return 'deadline-urgent';
+    case 'warning': return 'deadline-warning';
+    case 'caution': return 'deadline-caution';
+    default: return '';
+  }
+};
+
 const TodoItem = ({
   todo,
   onMarkDone,
@@ -25,7 +52,8 @@ const TodoItem = ({
   isDone = false,
   isDraggable = false,
   canMoveUp = false,
-  canMoveDown = false
+  canMoveDown = false,
+  isAnimating = false
 }) => {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const menuRef = useRef(null);
@@ -100,7 +128,7 @@ const TodoItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`todo-item ${isDone ? 'done' : ''} ${isDragging ? 'dragging' : ''}`}
+      className={`todo-item ${isDone ? 'done' : ''} ${isDragging ? 'dragging' : ''} ${isAnimating ? 'moving' : ''} ${getDeadlineClass(todo.deadline)}`}
     >
       <div className="todo-content">
         {/* Desktop: Drag handle, Mobile: Reorder arrows */}
@@ -139,6 +167,11 @@ const TodoItem = ({
           {isDone && todo.completed_date && (
             <div className="completion-date">
               Completed: {new Date(todo.completed_date).toLocaleDateString()}
+            </div>
+          )}
+          {!isDone && todo.deadline && (
+            <div className={`deadline-display ${getDeadlineClass(todo.deadline)}`}>
+              Due: {new Date(todo.deadline).toLocaleDateString()}
             </div>
           )}
           {todo.tags && todo.tags.length > 0 && (

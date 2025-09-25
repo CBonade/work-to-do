@@ -10,6 +10,7 @@ export const todoService = {
       .eq('user_id', userId)
       .eq('context', context)
       .eq('completed', false)
+      .order('sort_order', { ascending: true, nullsLast: true })
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -38,6 +39,20 @@ export const todoService = {
 
   // Create a new todo
   async createTodo(userId, context, todoData) {
+    // Get the current max sort_order for this user/context
+    const { data: maxOrderData } = await supabase
+      .from('todos')
+      .select('sort_order')
+      .eq('user_id', userId)
+      .eq('context', context)
+      .eq('completed', false)
+      .order('sort_order', { ascending: false, nullsLast: false })
+      .limit(1);
+
+    const nextSortOrder = maxOrderData?.[0]?.sort_order != null
+      ? maxOrderData[0].sort_order + 1
+      : 0;
+
     const { data, error } = await supabase
       .from('todos')
       .insert([{
@@ -45,7 +60,9 @@ export const todoService = {
         context: context,
         text: todoData.text,
         tags: todoData.tags || [],
-        completed: false
+        completed: false,
+        sort_order: nextSortOrder,
+        deadline: todoData.deadline || null
       }])
       .select()
       .single();
@@ -110,7 +127,8 @@ export const todoService = {
       text: todo.text,
       tags: todo.tags || [],
       completed: todo.completed || false,
-      completed_date: todo.completedDate || null
+      completed_date: todo.completed_date || null,
+      deadline: todo.deadline || null
     }));
 
     const { data, error } = await supabase
@@ -123,6 +141,26 @@ export const todoService = {
       throw error;
     }
     return data;
+  },
+
+  // Update sort order for multiple todos
+  async updateTodoOrder(todos) {
+    // Update each todo's sort_order individually to respect RLS policies
+    const updatePromises = todos.map((todo, index) =>
+      supabase
+        .from('todos')
+        .update({ sort_order: index })
+        .eq('id', todo.id)
+    );
+
+    const results = await Promise.all(updatePromises);
+
+    // Check for any errors
+    const errors = results.filter(result => result.error);
+    if (errors.length > 0) {
+      console.error('Error updating todo order:', errors[0].error);
+      throw errors[0].error;
+    }
   }
 };
 
@@ -193,6 +231,129 @@ export const tagService = {
 
     if (error) {
       console.error('Error bulk creating tags:', error);
+      throw error;
+    }
+    return data;
+  }
+};
+
+// Weekly Task operations
+export const weeklyTaskService = {
+  // Get all weekly tasks for a user and context
+  async getWeeklyTasks(userId, context) {
+    const { data, error } = await supabase
+      .from('weekly_tasks')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('context', context)
+      .order('day_of_week', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching weekly tasks:', error);
+      throw error;
+    }
+    return data || [];
+  },
+
+  // Create a new weekly task
+  async createWeeklyTask(userId, context, taskData) {
+    const { data, error } = await supabase
+      .from('weekly_tasks')
+      .insert([{
+        user_id: userId,
+        context: context,
+        text: taskData.text,
+        day_of_week: taskData.dayOfWeek, // 0 = Sunday, 1 = Monday, etc.
+        completed_this_week: false,
+        last_completed_date: null
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating weekly task:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Mark weekly task as completed for this week
+  async markWeeklyTaskCompleted(taskId) {
+    const { data, error } = await supabase
+      .from('weekly_tasks')
+      .update({
+        completed_this_week: true,
+        last_completed_date: new Date().toISOString()
+      })
+      .eq('id', taskId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error marking weekly task completed:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Mark weekly task as incomplete
+  async markWeeklyTaskIncomplete(taskId) {
+    const { data, error } = await supabase
+      .from('weekly_tasks')
+      .update({
+        completed_this_week: false
+      })
+      .eq('id', taskId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error marking weekly task incomplete:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Reset all weekly tasks for a new week
+  async resetWeeklyTasks(userId, context) {
+    const { error } = await supabase
+      .from('weekly_tasks')
+      .update({
+        completed_this_week: false
+      })
+      .eq('user_id', userId)
+      .eq('context', context);
+
+    if (error) {
+      console.error('Error resetting weekly tasks:', error);
+      throw error;
+    }
+  },
+
+  // Delete a weekly task
+  async deleteWeeklyTask(taskId) {
+    const { error } = await supabase
+      .from('weekly_tasks')
+      .delete()
+      .eq('id', taskId);
+
+    if (error) {
+      console.error('Error deleting weekly task:', error);
+      throw error;
+    }
+  },
+
+  // Update a weekly task
+  async updateWeeklyTask(taskId, updates) {
+    const { data, error } = await supabase
+      .from('weekly_tasks')
+      .update(updates)
+      .eq('id', taskId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating weekly task:', error);
       throw error;
     }
     return data;

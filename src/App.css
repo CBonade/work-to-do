@@ -89,12 +89,37 @@
   box-shadow: 0 2px 4px rgba(0, 122, 204, 0.3);
 }
 
-/* Right Section: User Menu */
+/* Right Section: Desktop Menu + User Menu */
 .nav-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex: 1;
+  gap: 16px;
+}
+
+/* Desktop Menu Buttons */
+.desktop-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.desktop-menu-btn {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #e0e0e0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.2s ease;
+}
+
+.desktop-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .user-menu-container {
@@ -482,6 +507,19 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* Enable smooth list animations */
+  position: relative;
+}
+
+/* Animation for items that are moving position */
+.todo-item.moving {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.3);
+  border-color: #14b8a6;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s ease,
+              border-color 0.4s ease,
+              margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .todo-item {
@@ -494,7 +532,10 @@
   padding: 16px;
   color: #e0e0e0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s ease,
+              margin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
 }
 
 .todo-item:hover {
@@ -1176,12 +1217,18 @@
   }
 }
 
-/* Mobile reorder buttons */
+/* Mobile reorder buttons - desktop hidden by default */
 .mobile-only.mobile-reorder {
-  display: flex !important;
-  flex-direction: column;
-  gap: 16px;
-  margin-right: 12px;
+  display: none !important; /* Hidden on desktop */
+}
+
+@media (max-width: 768px) {
+  .mobile-only.mobile-reorder {
+    display: flex !important; /* Show on mobile */
+    flex-direction: column;
+    gap: 16px;
+    margin-right: 12px;
+  }
 }
 
 .reorder-btn {
@@ -1467,4 +1514,407 @@
   padding: 20px;
   color: #888;
   font-style: italic;
+}
+
+/* Section Header Layout */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Desktop Add Button */
+.desktop-add-btn {
+  background: #14b8a6;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.desktop-add-btn:hover {
+  background: #0d9488;
+}
+
+/* Floating Add Button (Mobile Only) */
+.floating-add-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #14b8a6;
+  border: none;
+  cursor: pointer;
+  display: none; /* Hidden by default (desktop) */
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.floating-add-button:hover {
+  background: #0d9488;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.floating-add-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .floating-add-button {
+    display: flex; /* Show on mobile */
+  }
+}
+
+/* Weekly Task Modal */
+.weekly-task-modal {
+  max-width: 600px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.weekly-task-form {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #404040;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #e0e0e0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.weekly-task-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  background: #262626;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+.weekly-task-input:focus {
+  outline: none;
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+}
+
+.day-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  background: #262626;
+  color: #e0e0e0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.day-select:focus {
+  outline: none;
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+}
+
+.add-weekly-task-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.weekly-tasks-list h3 {
+  color: #e0e0e0;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.no-tasks {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+.weekly-tasks-by-day {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.day-group {
+  background: #262626;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #404040;
+}
+
+.day-header {
+  color: #14b8a6;
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weekly-task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #1a1a1a;
+  border-radius: 6px;
+  border: 1px solid #404040;
+}
+
+.weekly-task-item .task-text {
+  color: #e0e0e0;
+  flex: 1;
+}
+
+.task-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.task-action-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.task-action-btn:hover {
+  color: #e0e0e0;
+  background: #404040;
+}
+
+.task-action-btn.delete-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Weekly Tasks Display Section */
+.weekly-tasks-section {
+  margin-bottom: 24px;
+  background: #262626;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #404040;
+}
+
+.weekly-tasks-indicator {
+  background: #14b8a6;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.manage-weekly-btn {
+  background: #404040;
+  border: none;
+  color: #e0e0e0;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.manage-weekly-btn:hover {
+  background: #525252;
+}
+
+.weekly-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.weekly-task-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #404040;
+  transition: all 0.2s ease;
+}
+
+.weekly-task-display:hover {
+  border-color: #525252;
+  background: #222222;
+}
+
+.weekly-task-display.completed {
+  opacity: 0.7;
+}
+
+.weekly-task-content {
+  flex: 1;
+}
+
+.weekly-task-text {
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+.weekly-task-text.strikethrough {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.weekly-task-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.weekly-task-btn {
+  background: #14b8a6;
+  border: none;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.weekly-task-btn:hover {
+  background: #0d9488;
+}
+
+@media (max-width: 768px) {
+  .weekly-tasks-section {
+    padding: 16px;
+  }
+
+  .manage-weekly-btn {
+    display: none; /* Hide on mobile, can be accessed through nav menu */
+  }
+}
+
+/* Deadline Input Styles */
+.deadline-input-container {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.deadline-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #e0e0e0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.deadline-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  background: #262626;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+.deadline-input:focus {
+  outline: none;
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+}
+
+/* Custom date input styling for dark theme */
+.deadline-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Deadline Visual Indicators */
+.deadline-display {
+  font-size: 12px;
+  margin-top: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Deadline border colors for todo items */
+.todo-item.deadline-caution {
+  border: 2px solid #f59e0b !important; /* Yellow - within 1 week */
+}
+
+.todo-item.deadline-warning {
+  border: 2px solid #f97316 !important; /* Orange - within 3 days */
+}
+
+.todo-item.deadline-urgent {
+  border: 2px solid #ef4444 !important; /* Red - within 1 day */
+}
+
+.todo-item.deadline-overdue {
+  border: 2px solid #dc2626 !important; /* Dark red - overdue */
+  background-color: rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Deadline display text colors */
+.deadline-display.deadline-caution {
+  color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.2);
+}
+
+.deadline-display.deadline-warning {
+  color: #fb923c;
+  background-color: rgba(251, 146, 60, 0.2);
+}
+
+.deadline-display.deadline-urgent {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.2);
+}
+
+.deadline-display.deadline-overdue {
+  color: #fca5a5;
+  background-color: rgba(252, 165, 165, 0.2);
+  font-weight: bold;
 }
