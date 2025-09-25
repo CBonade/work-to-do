@@ -252,16 +252,18 @@ function App() {
       // Start swap animation
       animateSwap(todoId, targetTodo.id, 'up');
 
-      // Delay the actual state update to let animation start
+      // Update state immediately for data consistency but animations will handle visual
+      const newTodos = arrayMove(todos, currentIndex, currentIndex - 1);
+
+      // Wait for animation to complete before updating state to prevent jerking
       setTimeout(() => {
-        const newTodos = arrayMove(todos, currentIndex, currentIndex - 1);
         setTodos(newTodos);
 
         // Persist the new order to database
         todoService.updateTodoOrder(newTodos).catch(error => {
           console.error('Error saving todo order:', error);
         });
-      }, 50); // Small delay to ensure animation starts
+      }, 400); // Match animation duration
     }
   };
 
@@ -273,16 +275,18 @@ function App() {
       // Start swap animation
       animateSwap(todoId, targetTodo.id, 'down');
 
-      // Delay the actual state update to let animation start
+      // Update state immediately for data consistency but animations will handle visual
+      const newTodos = arrayMove(todos, currentIndex, currentIndex + 1);
+
+      // Wait for animation to complete before updating state to prevent jerking
       setTimeout(() => {
-        const newTodos = arrayMove(todos, currentIndex, currentIndex + 1);
         setTodos(newTodos);
 
         // Persist the new order to database
         todoService.updateTodoOrder(newTodos).catch(error => {
           console.error('Error saving todo order:', error);
         });
-      }, 50); // Small delay to ensure animation starts
+      }, 400); // Match animation duration
     }
   };
 
@@ -465,7 +469,8 @@ function App() {
     setSwappingAnimation({
       movingId,
       targetId,
-      direction // 'up' or 'down'
+      movingClass: `moving-${direction}`,
+      targetClass: direction === 'up' ? 'target-down' : 'target-up'
     });
 
     setTimeout(() => {
@@ -634,8 +639,8 @@ function App() {
                       canMoveUp={index > 0}
                       canMoveDown={index < todos.length - 1}
                       swappingState={swappingAnimation && (
-                        todo.id === swappingAnimation.movingId ? `swapping-${swappingAnimation.direction}` :
-                        todo.id === swappingAnimation.targetId ? 'swapping-target' : null
+                        todo.id === swappingAnimation.movingId ? swappingAnimation.movingClass :
+                        todo.id === swappingAnimation.targetId ? swappingAnimation.targetClass : null
                       )}
                     />
                   ))}

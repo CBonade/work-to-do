@@ -530,15 +530,8 @@
   }
 }
 
-.todo-item.swapping-down {
-  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  z-index: 10;
-  background: #454545;
-  border-color: #14b8a6;
-  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.3);
-}
-
-.todo-item.swapping-up {
+/* When an item is moving UP, it slides UP */
+.todo-item.moving-up {
   animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   z-index: 10;
   background: #454545;
@@ -546,8 +539,24 @@
   box-shadow: 0 4px 16px rgba(20, 184, 166, 0.3);
 }
 
-.todo-item.swapping-target {
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* When an item is moving DOWN, it slides DOWN */
+.todo-item.moving-down {
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 10;
+  background: #454545;
+  border-color: #14b8a6;
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.3);
+}
+
+/* When an item above is being displaced DOWN */
+.todo-item.target-down {
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 5;
+}
+
+/* When an item below is being displaced UP */
+.todo-item.target-up {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   z-index: 5;
 }
 
