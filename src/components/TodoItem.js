@@ -9,6 +9,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import UndoIcon from '@mui/icons-material/Undo';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CancelIcon from '@mui/icons-material/Cancel';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -47,6 +48,7 @@ const TodoItem = ({
   onMarkDone,
   onDelete,
   onEdit,
+  onWontDo,
   onMoveUp,
   onMoveDown,
   isDone = false,
@@ -235,6 +237,13 @@ const TodoItem = ({
                     >
                       <EditIcon sx={{ fontSize: 16, marginRight: 1 }} />
                       Edit
+                    </button>
+                    <button
+                      className="dropdown-action wont-do-action"
+                      onClick={() => handleActionClick(() => onWontDo(todo.id))}
+                    >
+                      <CancelIcon sx={{ fontSize: 16, marginRight: 1 }} />
+                      Won't Do
                     </button>
                     <button
                       className="dropdown-action delete-action"

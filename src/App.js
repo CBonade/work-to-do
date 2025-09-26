@@ -35,6 +35,7 @@ function App() {
   // Data state
   const [todos, setTodos] = useState([]);
   const [doneTodos, setDoneTodos] = useState([]);
+  const [wontDoTodos, setWontDoTodos] = useState([]);
   const [tags, setTags] = useState([]);
   const [weeklyTasks, setWeeklyTasks] = useState([]);
 
@@ -45,6 +46,7 @@ function App() {
   const [editTodo, setEditTodo] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDoneSectionCollapsed, setIsDoneSectionCollapsed] = useState(true);
+  const [isWontDoSectionCollapsed, setIsWontDoSectionCollapsed] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMigrated, setHasMigrated] = useState(false);
   const [swappingAnimation, setSwappingAnimation] = useState(null);
@@ -120,15 +122,17 @@ function App() {
 
     setIsLoading(true);
     try {
-      const [todosData, doneTodosData, tagsData, weeklyTasksData] = await Promise.all([
+      const [todosData, doneTodosData, wontDoTodosData, tagsData, weeklyTasksData] = await Promise.all([
         todoService.getTodos(user.id, currentContext),
         todoService.getCompletedTodos(user.id, currentContext),
+        todoService.getWontDoTodos(user.id, currentContext),
         tagService.getTags(user.id, currentContext),
         weeklyTaskService.getWeeklyTasks(user.id, currentContext)
       ]);
 
       setTodos(sortTodosWithDeadlines(todosData));
       setDoneTodos(doneTodosData);
+      setWontDoTodos(wontDoTodosData);
       setTags(tagsData);
       setWeeklyTasks(weeklyTasksData);
     } catch (error) {
@@ -220,8 +224,29 @@ function App() {
       await todoService.deleteTodo(id);
       setTodos(prev => prev.filter(t => t.id !== id));
       setDoneTodos(prev => prev.filter(t => t.id !== id));
+      setWontDoTodos(prev => prev.filter(t => t.id !== id));
     } catch (error) {
       console.error('Error deleting todo:', error);
+    }
+  };
+
+  const markTodoWontDo = async (id) => {
+    try {
+      const updatedTodo = await todoService.markTodoWontDo(id);
+      setTodos(prev => prev.filter(t => t.id !== id));
+      setWontDoTodos(prev => [...prev, updatedTodo]);
+    } catch (error) {
+      console.error('Error marking todo won\'t do:', error);
+    }
+  };
+
+  const markTodoWillDo = async (id) => {
+    try {
+      const updatedTodo = await todoService.markTodoWillDo(id);
+      setWontDoTodos(prev => prev.filter(t => t.id !== id));
+      setTodos(prev => sortTodosWithDeadlines([...prev, updatedTodo]));
+    } catch (error) {
+      console.error('Error marking todo will do:', error);
     }
   };
 
@@ -309,12 +334,16 @@ function App() {
       await tagService.deleteTag(tagId);
       setTags(prev => prev.filter(tag => tag.id !== tagId));
 
-      // Remove tag from todos and doneTodos in local state
+      // Remove tag from todos, doneTodos, and wontDoTodos in local state
       setTodos(prev => prev.map(todo => ({
         ...todo,
         tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
       })));
       setDoneTodos(prev => prev.map(todo => ({
+        ...todo,
+        tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
+      })));
+      setWontDoTodos(prev => prev.map(todo => ({
         ...todo,
         tags: todo.tags ? todo.tags.filter(tag => tag.id !== tagId) : []
       })));
@@ -338,6 +367,10 @@ function App() {
 
       if (savedTodo.completed) {
         setDoneTodos(prev => prev.map(todo =>
+          todo.id === savedTodo.id ? savedTodo : todo
+        ));
+      } else if (savedTodo.wont_do) {
+        setWontDoTodos(prev => prev.map(todo =>
           todo.id === savedTodo.id ? savedTodo : todo
         ));
       } else {
@@ -633,6 +666,7 @@ function App() {
                       onMarkDone={markTodoDone}
                       onDelete={deleteTodo}
                       onEdit={handleEditTodo}
+                      onWontDo={markTodoWontDo}
                       onMoveUp={handleMoveUp}
                       onMoveDown={handleMoveDown}
                       isDraggable={true}
@@ -689,6 +723,42 @@ function App() {
                 {doneTodos.length === 0 && (
                   <div className="no-done-todos">
                     No completed todos yet
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="wont-do-section">
+            <div
+              className="collapsible-header"
+              onClick={() => setIsWontDoSectionCollapsed(!isWontDoSectionCollapsed)}
+            >
+              <h2>Won't Do ({wontDoTodos.length})</h2>
+              <span className="collapse-arrow">
+                {isWontDoSectionCollapsed ? (
+                  <ExpandMoreIcon sx={{ color: 'white', fontSize: 20 }} />
+                ) : (
+                  <ExpandLessIcon sx={{ color: 'white', fontSize: 20 }} />
+                )}
+              </span>
+            </div>
+            {!isWontDoSectionCollapsed && (
+              <div className="wont-do-todo-list">
+                {wontDoTodos.map((todo) => (
+                  <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onMarkDone={markTodoWillDo}
+                    onDelete={deleteTodo}
+                    onEdit={handleEditTodo}
+                    isDone={false}
+                    isDraggable={false}
+                  />
+                ))}
+                {wontDoTodos.length === 0 && (
+                  <div className="no-done-todos">
+                    No items marked as "won't do" yet
                   </div>
                 )}
               </div>

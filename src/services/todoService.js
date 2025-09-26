@@ -10,11 +10,29 @@ export const todoService = {
       .eq('user_id', userId)
       .eq('context', context)
       .eq('completed', false)
+      .eq('wont_do', false)
       .order('sort_order', { ascending: true, nullsLast: true })
       .order('created_at', { ascending: true });
 
     if (error) {
       console.error('Error fetching todos:', error);
+      throw error;
+    }
+    return data || [];
+  },
+
+  // Get won't do todos for a user and context
+  async getWontDoTodos(userId, context) {
+    const { data, error } = await supabase
+      .from('todos')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('context', context)
+      .eq('wont_do', true)
+      .order('wont_do_date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching won\'t do todos:', error);
       throw error;
     }
     return data || [];
@@ -103,6 +121,24 @@ export const todoService = {
     return this.updateTodo(todoId, {
       completed: false,
       completed_date: null
+    });
+  },
+
+  // Mark todo as won't do
+  async markTodoWontDo(todoId) {
+    return this.updateTodo(todoId, {
+      wont_do: true,
+      wont_do_date: new Date().toISOString(),
+      completed: false,
+      completed_date: null
+    });
+  },
+
+  // Unmark todo as won't do (back to active)
+  async markTodoWillDo(todoId) {
+    return this.updateTodo(todoId, {
+      wont_do: false,
+      wont_do_date: null
     });
   },
 
