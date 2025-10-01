@@ -1,9 +1,29 @@
 import { supabase } from '../lib/supabase';
+import {
+  mockTodoService,
+  mockTagService,
+  mockWeeklyTaskService,
+  mockAgendaService,
+  initializeMockData
+} from './mockService';
 
-// Todo operations
-export const todoService = {
+// Check if we're on localhost for development
+const isLocalhost = () => {
+  return window.location.hostname === 'localhost' ||
+         window.location.hostname === '127.0.0.1' ||
+         window.location.hostname === '';
+};
+
+// Initialize mock data on localhost
+if (isLocalhost()) {
+  initializeMockData();
+}
+
+// Real todo service implementation
+const realTodoService = {
   // Get all todos for a user and context
   async getTodos(userId, context) {
+
     const { data, error } = await supabase
       .from('todos')
       .select('*')
@@ -200,8 +220,8 @@ export const todoService = {
   }
 };
 
-// Tag operations
-export const tagService = {
+// Real tag service implementation
+const realTagService = {
   // Get all tags for a user and context
   async getTags(userId, context) {
     const { data, error } = await supabase
@@ -273,8 +293,8 @@ export const tagService = {
   }
 };
 
-// Weekly Task operations
-export const weeklyTaskService = {
+// Real weekly task service implementation
+const realWeeklyTaskService = {
   // Get all weekly tasks for a user and context
   async getWeeklyTasks(userId, context) {
     const { data, error } = await supabase
@@ -395,3 +415,176 @@ export const weeklyTaskService = {
     return data;
   }
 };
+
+// Real agenda service implementation
+const realAgendaService = {
+  // Get all agendas for a user and context
+  async getAgendas(userId, context) {
+    const { data, error } = await supabase
+      .from('agendas')
+      .select(`
+        *,
+        agenda_items (
+          id,
+          text,
+          sort_order,
+          created_at
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('context', context)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching agendas:', error);
+      throw error;
+    }
+
+    // Sort agenda items by sort_order
+    const agendasWithSortedItems = (data || []).map(agenda => ({
+      ...agenda,
+      agenda_items: (agenda.agenda_items || []).sort((a, b) => a.sort_order - b.sort_order)
+    }));
+
+    return agendasWithSortedItems;
+  },
+
+  // Create a new agenda
+  async createAgenda(userId, context, agendaData) {
+    const { data, error } = await supabase
+      .from('agendas')
+      .insert([{
+        user_id: userId,
+        context: context,
+        title: agendaData.title,
+        is_collapsed: agendaData.is_collapsed !== undefined ? agendaData.is_collapsed : true
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating agenda:', error);
+      throw error;
+    }
+    return { ...data, agenda_items: [] };
+  },
+
+  // Update an agenda
+  async updateAgenda(agendaId, updates) {
+    const { data, error } = await supabase
+      .from('agendas')
+      .update(updates)
+      .eq('id', agendaId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating agenda:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Delete an agenda
+  async deleteAgenda(agendaId) {
+    const { error } = await supabase
+      .from('agendas')
+      .delete()
+      .eq('id', agendaId);
+
+    if (error) {
+      console.error('Error deleting agenda:', error);
+      throw error;
+    }
+  },
+
+  // Add item to agenda
+  async addAgendaItem(agendaId, itemText) {
+    // Get the current max sort_order for this agenda
+    const { data: maxOrderData } = await supabase
+      .from('agenda_items')
+      .select('sort_order')
+      .eq('agenda_id', agendaId)
+      .order('sort_order', { ascending: false, nullsLast: false })
+      .limit(1);
+
+    const nextSortOrder = maxOrderData?.[0]?.sort_order != null
+      ? maxOrderData[0].sort_order + 1
+      : 0;
+
+    const { data, error } = await supabase
+      .from('agenda_items')
+      .insert([{
+        agenda_id: agendaId,
+        text: itemText,
+        sort_order: nextSortOrder
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding agenda item:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Update agenda item
+  async updateAgendaItem(itemId, updates) {
+    const { data, error } = await supabase
+      .from('agenda_items')
+      .update(updates)
+      .eq('id', itemId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating agenda item:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Delete agenda item
+  async deleteAgendaItem(itemId) {
+    const { error } = await supabase
+      .from('agenda_items')
+      .delete()
+      .eq('id', itemId);
+
+    if (error) {
+      console.error('Error deleting agenda item:', error);
+      throw error;
+    }
+  },
+
+  // Reorder agenda items
+  async reorderAgendaItems(items) {
+    const updatePromises = items.map((item, index) =>
+      supabase
+        .from('agenda_items')
+        .update({ sort_order: index })
+        .eq('id', item.id)
+    );
+
+    const results = await Promise.all(updatePromises);
+
+    // Check for any errors
+    const errors = results.filter(result => result.error);
+    if (errors.length > 0) {
+      console.error('Error reordering agenda items:', errors[0].error);
+      throw errors[0].error;
+    }
+  }
+};
+
+// Conditional exports based on environment
+if (isLocalhost()) {
+  console.log('🔧 Using mock services for localhost development');
+}
+
+// Export services with conditional mock support
+export const todoService = isLocalhost() ? mockTodoService : realTodoService;
+export const tagService = isLocalhost() ? mockTagService : realTagService;
+export const weeklyTaskService = isLocalhost() ? mockWeeklyTaskService : realWeeklyTaskService;
+export const agendaService = isLocalhost() ? mockAgendaService : realAgendaService;

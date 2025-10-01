@@ -11,12 +11,39 @@ export const useAuth = () => {
   return context;
 };
 
+// Check if we're on localhost for development
+const isLocalhost = () => {
+  return window.location.hostname === 'localhost' ||
+         window.location.hostname === '127.0.0.1' ||
+         window.location.hostname === '';
+};
+
+// Mock user for localhost development
+const mockUser = {
+  id: 'mock-user-id-123',
+  email: 'dev@localhost.com',
+  user_metadata: {
+    full_name: 'Local Dev User',
+    avatar_url: 'https://github.com/github.png'
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    if (isLocalhost()) {
+      // Mock authentication for localhost
+      console.log('🔧 Development mode: Using mock authentication');
+      setTimeout(() => {
+        setUser(mockUser);
+        setLoading(false);
+      }, 500); // Simulate a brief loading time
+      return;
+    }
+
+    // Real authentication for production
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
@@ -38,7 +65,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signInWithGitHub = async () => {
-    // For GitHub Pages deployment, we need to include the full path
+    if (isLocalhost()) {
+      // Mock sign in for localhost
+      console.log('🔧 Development mode: Mock sign in');
+      setUser(mockUser);
+      return;
+    }
+
+    // Real GitHub OAuth for production
     const redirectUrl = process.env.NODE_ENV === 'production'
       ? `${window.location.origin}/work-to-do/`
       : window.location.origin;
@@ -56,6 +90,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
+    if (isLocalhost()) {
+      // Mock sign out for localhost
+      console.log('🔧 Development mode: Mock sign out');
+      setUser(null);
+      return;
+    }
+
+    // Real sign out for production
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error('Error signing out:', error);

@@ -864,6 +864,12 @@
   font-size: 1.5rem;
 }
 
+.modal-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.3rem;
+}
+
 .modal-close {
   background: none;
   border: none;
@@ -1265,6 +1271,736 @@
   font-style: italic;
   padding: 40px 20px;
   font-size: 16px;
+}
+
+/* Agenda Section Styles */
+.agendas-section {
+  background: #262626;
+  border: 1px solid #404040;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 30px;
+}
+
+.agendas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Individual Agenda Item Card */
+.agenda-item-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.agenda-item-card:hover {
+  border-color: #14b8a6;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.1);
+}
+
+.agenda-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  background: #1a1a1a;
+  transition: background-color 0.2s ease;
+}
+
+.agenda-item-header:hover {
+  background: #222;
+}
+
+.agenda-item-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.agenda-collapse-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.agenda-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.agenda-item-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.agenda-item-count {
+  color: #888;
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.agenda-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agenda-date {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.agenda-manage-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #14b8a6;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.agenda-manage-btn:hover {
+  background: rgba(20, 184, 166, 0.1);
+  border-color: #14b8a6;
+}
+
+/* Agenda Content (when expanded) */
+.agenda-item-content {
+  padding: 0 20px 20px;
+  background: #111;
+}
+
+.agenda-bullet-points {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agenda-bullet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
+}
+
+.agenda-bullet-item:last-child {
+  border-bottom: none;
+}
+
+.bullet {
+  color: #14b8a6;
+  font-weight: bold;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.bullet-text {
+  color: #e5e5e5;
+  flex: 1;
+  line-height: 1.5;
+}
+
+.followup-btn {
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  color: #14b8a6;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.followup-btn:hover {
+  background: rgba(20, 184, 166, 0.2);
+  border-color: #14b8a6;
+  opacity: 1;
+}
+
+.no-agenda-items {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+.add-items-btn {
+  background: #14b8a6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.add-items-btn:hover {
+  background: #0f9488;
+}
+
+/* Agenda Modal Styles */
+.agenda-modal {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.agenda-modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.add-agenda-form {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #404040;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.input-with-button .form-input {
+  flex: 1;
+}
+
+.add-btn {
+  background: #14b8a6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.add-btn:hover {
+  background: #0f9488;
+}
+
+.no-agendas {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 40px 20px;
+  font-size: 16px;
+}
+
+/* Agenda Card in Modal */
+.agenda-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.agenda-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #222;
+}
+
+.agenda-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #14b8a6;
+  transition: background-color 0.2s ease;
+}
+
+.collapse-btn:hover {
+  background: rgba(20, 184, 166, 0.1);
+}
+
+.title-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agenda-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.edit-title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.edit-title-input {
+  background: #333;
+  border: 1px solid #555;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.save-title-btn,
+.cancel-edit-btn {
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  color: #14b8a6;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.save-title-btn:hover,
+.cancel-edit-btn:hover {
+  background: rgba(20, 184, 166, 0.2);
+  border-color: #14b8a6;
+}
+
+.agenda-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #14b8a6;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: rgba(20, 184, 166, 0.1);
+  border-color: #14b8a6;
+}
+
+.action-btn.delete-btn {
+  color: #ff6b6b;
+}
+
+.action-btn.delete-btn:hover {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: #ff6b6b;
+}
+
+/* Agenda Content in Modal */
+.agenda-content {
+  padding: 20px;
+  background: #111;
+}
+
+.agenda-items {
+  margin-bottom: 16px;
+}
+
+.agenda-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
+}
+
+.agenda-item:last-child {
+  border-bottom: none;
+}
+
+.bullet-point {
+  color: #14b8a6;
+  font-weight: bold;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.item-text {
+  color: #e5e5e5;
+  flex: 1;
+  line-height: 1.5;
+}
+
+.item-actions {
+  display: flex;
+  gap: 6px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.agenda-item:hover .item-actions {
+  opacity: 1;
+}
+
+.create-followup-btn,
+.delete-item-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #14b8a6;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.create-followup-btn:hover {
+  background: rgba(20, 184, 166, 0.1);
+  border-color: #14b8a6;
+}
+
+.delete-item-btn {
+  color: #ff6b6b;
+}
+
+.delete-item-btn:hover {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: #ff6b6b;
+}
+
+.add-item-section {
+  border-top: 1px solid #333;
+  padding-top: 16px;
+}
+
+.add-item-input {
+  background: #333;
+  border: 1px solid #555;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  flex: 1;
+}
+
+.add-item-btn {
+  background: #14b8a6;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.add-item-btn:hover:not(:disabled) {
+  background: #0f9488;
+}
+
+.add-item-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Agendas Page Styles */
+.agendas-page {
+  background: #262626;
+  border: 1px solid #404040;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 30px;
+}
+
+.agendas-header {
+  margin-bottom: 24px;
+}
+
+.context-indicator.context-agendas {
+  background: #1a1a1a;
+  color: #14b8a6;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  border: 1px solid #14b8a6;
+}
+
+.no-agendas-message {
+  text-align: center;
+  padding: 60px 20px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 2px dashed #404040;
+}
+
+.no-agendas-message h3 {
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  font-size: 1.4rem;
+}
+
+.no-agendas-message p {
+  color: #888;
+  margin: 0 0 24px 0;
+  font-size: 1rem;
+}
+
+/* Full Agenda Item Styles */
+.agenda-full-item {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.agenda-full-item:hover {
+  border-color: #14b8a6;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.1);
+}
+
+.agenda-full-header {
+  padding: 20px;
+  background: #222;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agenda-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.agenda-collapse-btn {
+  background: none;
+  border: none;
+  color: #14b8a6;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.agenda-collapse-btn:hover {
+  background: rgba(20, 184, 166, 0.1);
+}
+
+.agenda-full-title {
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.agenda-full-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-secondary.small,
+.btn-danger.small {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-danger {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: #ff6b6b;
+}
+
+/* Agenda Content */
+.agenda-full-content {
+  padding: 20px;
+  background: #111;
+}
+
+.agenda-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agenda-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #333;
+}
+
+.agenda-item-row:last-of-type {
+  border-bottom: none;
+}
+
+.agenda-bullet {
+  color: #14b8a6;
+  font-weight: bold;
+  font-size: 1.2rem;
+  min-width: 16px;
+}
+
+.agenda-item-text {
+  flex: 1;
+  color: #e5e5e5;
+  line-height: 1.5;
+}
+
+.agenda-item-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.agenda-item-row:hover .agenda-item-actions {
+  opacity: 1;
+}
+
+.btn-followup {
+  background: rgba(20, 184, 166, 0.1);
+  color: #14b8a6;
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-followup:hover {
+  background: rgba(20, 184, 166, 0.2);
+  border-color: #14b8a6;
+}
+
+.btn-delete-item {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
+}
+
+.btn-delete-item:hover {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: #ff6b6b;
+}
+
+/* Add Agenda Item Section */
+.add-agenda-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #333;
+  margin-top: 16px;
+}
+
+.add-agenda-item .add-item-input {
+  flex: 1;
+  background: #333;
+  border: 1px solid #555;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.add-agenda-item .add-item-input:focus {
+  outline: none;
+  border-color: #14b8a6;
+}
+
+.btn-add-item {
+  background: #14b8a6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-add-item:hover {
+  background: #0f9488;
 }
 
 /* Mobile responsiveness classes */
@@ -1996,4 +2732,125 @@
   color: #fca5a5;
   background-color: rgba(252, 165, 165, 0.2);
   font-weight: bold;
+}
+
+/* FollowUp Modal Styles */
+.followup-modal {
+  max-width: 500px;
+}
+
+.followup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.todo-input {
+  padding: 12px;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.todo-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.todo-input::placeholder {
+  color: #888;
+}
+
+.context-selection {
+  display: flex;
+  gap: 20px;
+  margin-top: 4px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.radio-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.radio-label {
+  color: #ffffff;
+  cursor: pointer;
+  user-select: none;
+}
+
+.radio-option:hover .radio-label {
+  color: #e5e5e5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-secondary {
+  padding: 10px 20px;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #404040;
+  color: #ffffff;
+}
+
+.btn-primary {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.btn-primary:disabled {
+  background-color: #374151;
+  color: #6b7280;
+  cursor: not-allowed;
 }

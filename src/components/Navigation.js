@@ -7,6 +7,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EventNoteIcon from '@mui/icons-material/EventNote';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navigation = ({ onOpenTagModal, onOpenWeeklyTaskModal, currentContext, onContextChange }) => {
@@ -78,6 +79,14 @@ const Navigation = ({ onOpenTagModal, onOpenWeeklyTaskModal, currentContext, onC
               <HomeIcon sx={{ color: 'white', fontSize: 16 }} />
               <span className="tab-text">Personal</span>
             </button>
+            <button
+              className={`context-tab ${currentContext === 'agendas' ? 'active' : ''}`}
+              onClick={() => onContextChange('agendas')}
+              title="Agendas"
+            >
+              <EventNoteIcon sx={{ color: 'white', fontSize: 16 }} />
+              <span className="tab-text">Agendas</span>
+            </button>
           </div>
         </div>
 
@@ -85,25 +94,6 @@ const Navigation = ({ onOpenTagModal, onOpenWeeklyTaskModal, currentContext, onC
         <div className="nav-right">
           {user && (
             <>
-              {/* Desktop Menu Buttons */}
-              <div className="desktop-menu desktop-only">
-                <button
-                  className="desktop-menu-btn"
-                  onClick={() => onOpenTagModal()}
-                  title="Manage Tags"
-                >
-                  <LocalOfferIcon sx={{ fontSize: 16, marginRight: 1 }} />
-                  Tags
-                </button>
-                <button
-                  className="desktop-menu-btn"
-                  onClick={() => onOpenWeeklyTaskModal()}
-                  title="Weekly Tasks"
-                >
-                  <CalendarTodayIcon sx={{ fontSize: 16, marginRight: 1 }} />
-                  Weekly
-                </button>
-              </div>
 
               <div className="user-menu-container">
               <button

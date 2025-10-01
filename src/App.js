@@ -21,11 +21,12 @@ import TagModal from './components/TagModal';
 import EditTodoModal from './components/EditTodoModal';
 import WeeklyTaskModal from './components/WeeklyTaskModal';
 import WeeklyTaskItem from './components/WeeklyTaskItem';
+import FollowUpModal from './components/FollowUpModal';
 import LoginPage from './components/LoginPage';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useAuth } from './contexts/AuthContext';
-import { todoService, tagService, weeklyTaskService } from './services/todoService';
+import { todoService, tagService, weeklyTaskService, agendaService } from './services/todoService';
 import './App.css';
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
   const [wontDoTodos, setWontDoTodos] = useState([]);
   const [tags, setTags] = useState([]);
   const [weeklyTasks, setWeeklyTasks] = useState([]);
+  const [agendas, setAgendas] = useState([]);
 
   // UI state
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
@@ -45,6 +47,8 @@ function App() {
   const [isWeeklyTaskModalOpen, setIsWeeklyTaskModalOpen] = useState(false);
   const [editTodo, setEditTodo] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
+  const [followUpInitialText, setFollowUpInitialText] = useState('');
   const [isDoneSectionCollapsed, setIsDoneSectionCollapsed] = useState(true);
   const [isWontDoSectionCollapsed, setIsWontDoSectionCollapsed] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -122,19 +126,32 @@ function App() {
 
     setIsLoading(true);
     try {
-      const [todosData, doneTodosData, wontDoTodosData, tagsData, weeklyTasksData] = await Promise.all([
-        todoService.getTodos(user.id, currentContext),
-        todoService.getCompletedTodos(user.id, currentContext),
-        todoService.getWontDoTodos(user.id, currentContext),
-        tagService.getTags(user.id, currentContext),
-        weeklyTaskService.getWeeklyTasks(user.id, currentContext)
-      ]);
+      if (currentContext === 'agendas') {
+        // Only load agendas data for agendas view
+        const agendasData = await agendaService.getAgendas(user.id, 'work'); // Load work agendas by default
+        setAgendas(agendasData);
+        setTodos([]);
+        setDoneTodos([]);
+        setWontDoTodos([]);
+        setTags([]);
+        setWeeklyTasks([]);
+      } else {
+        // Load todo-related data for work/personal contexts
+        const [todosData, doneTodosData, wontDoTodosData, tagsData, weeklyTasksData] = await Promise.all([
+          todoService.getTodos(user.id, currentContext),
+          todoService.getCompletedTodos(user.id, currentContext),
+          todoService.getWontDoTodos(user.id, currentContext),
+          tagService.getTags(user.id, currentContext),
+          weeklyTaskService.getWeeklyTasks(user.id, currentContext)
+        ]);
 
-      setTodos(sortTodosWithDeadlines(todosData));
-      setDoneTodos(doneTodosData);
-      setWontDoTodos(wontDoTodosData);
-      setTags(tagsData);
-      setWeeklyTasks(weeklyTasksData);
+        setTodos(sortTodosWithDeadlines(todosData));
+        setDoneTodos(doneTodosData);
+        setWontDoTodos(wontDoTodosData);
+        setTags(tagsData);
+        setWeeklyTasks(weeklyTasksData);
+        setAgendas([]); // Clear agendas when not in agendas view
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -467,6 +484,119 @@ function App() {
     }
   };
 
+  // Agenda handlers
+  const addAgenda = async (agendaData) => {
+    if (!user) return;
+
+    try {
+      // Always create agendas in 'work' context since agendas are context-independent
+      const newAgenda = await agendaService.createAgenda(user.id, 'work', agendaData);
+      setAgendas(prev => [newAgenda, ...prev]);
+    } catch (error) {
+      console.error('Error adding agenda:', error.message || error);
+      console.error('Full error object:', error);
+    }
+  };
+
+  const deleteAgenda = async (agendaId) => {
+    try {
+      await agendaService.deleteAgenda(agendaId);
+      setAgendas(prev => prev.filter(agenda => agenda.id !== agendaId));
+    } catch (error) {
+      console.error('Error deleting agenda:', error);
+    }
+  };
+
+  const updateAgenda = async (agendaId, updates) => {
+    try {
+      const updatedAgenda = await agendaService.updateAgenda(agendaId, updates);
+      setAgendas(prev => prev.map(agenda =>
+        agenda.id === agendaId ? { ...agenda, ...updatedAgenda } : agenda
+      ));
+    } catch (error) {
+      console.error('Error updating agenda:', error);
+    }
+  };
+
+  const addAgendaItem = async (agendaId, itemText) => {
+    try {
+      const newItem = await agendaService.addAgendaItem(agendaId, itemText);
+      setAgendas(prev => prev.map(agenda =>
+        agenda.id === agendaId
+          ? { ...agenda, agenda_items: [...(agenda.agenda_items || []), newItem] }
+          : agenda
+      ));
+    } catch (error) {
+      console.error('Error adding agenda item:', error.message || error);
+      console.error('Full error object:', error);
+    }
+  };
+
+  const deleteAgendaItem = async (itemId) => {
+    try {
+      await agendaService.deleteAgendaItem(itemId);
+      setAgendas(prev => prev.map(agenda => ({
+        ...agenda,
+        agenda_items: agenda.agenda_items?.filter(item => item.id !== itemId) || []
+      })));
+    } catch (error) {
+      console.error('Error deleting agenda item:', error);
+    }
+  };
+
+  const updateAgendaItem = async (itemId, updates) => {
+    try {
+      const updatedItem = await agendaService.updateAgendaItem(itemId, updates);
+      setAgendas(prev => prev.map(agenda => ({
+        ...agenda,
+        agenda_items: agenda.agenda_items?.map(item =>
+          item.id === itemId ? updatedItem : item
+        ) || []
+      })));
+    } catch (error) {
+      console.error('Error updating agenda item:', error);
+    }
+  };
+
+  const toggleAgendaCollapse = async (agendaId, isCollapsed) => {
+    try {
+      await agendaService.updateAgenda(agendaId, { is_collapsed: !isCollapsed });
+      setAgendas(prev => prev.map(agenda =>
+        agenda.id === agendaId ? { ...agenda, is_collapsed: !isCollapsed } : agenda
+      ));
+    } catch (error) {
+      console.error('Error toggling agenda collapse:', error);
+    }
+  };
+
+  const openFollowUpModal = (itemText) => {
+    setFollowUpInitialText(itemText);
+    setIsFollowUpModalOpen(true);
+  };
+
+  const createFollowUpFromAgenda = async (todoText, targetContext) => {
+    try {
+      const todoData = {
+        text: todoText,
+        tags: [],
+        deadline: null
+      };
+
+      // Create the todo in the specified context
+      const newTodo = await todoService.createTodo(user.id, targetContext, todoData);
+
+      // If creating in current context, update local state
+      if (targetContext === currentContext) {
+        setTodos(prev => sortTodosWithDeadlines([...prev, newTodo]));
+      }
+
+      // Show success message or feedback
+      console.log(`Follow-up todo created in ${targetContext} context`);
+    } catch (error) {
+      console.error('Error creating follow-up todo:', error);
+    }
+  };
+
   // Get current day of week (0 = Sunday, 1 = Monday, etc.) in ET timezone
   const getCurrentDayOfWeek = () => {
     const now = new Date();
@@ -630,7 +760,162 @@ function App() {
           </div>
         )}
 
-        <div className="todo-sections">
+
+        {/* Main Content Area */}
+        {currentContext === 'agendas' ? (
+          // Agendas Page
+          <div className="agendas-page">
+            <div className="agendas-header">
+              <div className="section-header">
+                <div className="section-header-left">
+                  <h2>Agendas</h2>
+                  <span className="context-indicator context-agendas">
+                    📋 Manage your meeting agendas and notes
+                  </span>
+                </div>
+                <div className="section-header-right">
+                  <button
+                    className="desktop-add-btn"
+                    onClick={() => {
+                      const title = prompt('Enter agenda title:');
+                      if (title && title.trim()) {
+                        addAgenda({ title: title.trim() });
+                      }
+                    }}
+                    title="Add new agenda"
+                  >
+                    Add Agenda
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="agendas-content">
+              {agendas.length === 0 ? (
+                <div className="no-agendas-message">
+                  <h3>No agendas yet</h3>
+                  <p>Create your first agenda to get started organizing your meetings and notes.</p>
+                  <button
+                    className="btn-primary"
+                    onClick={() => {
+                      const title = prompt('Enter agenda title:');
+                      if (title && title.trim()) {
+                        addAgenda({ title: title.trim() });
+                      }
+                    }}
+                  >
+                    Create First Agenda
+                  </button>
+                </div>
+              ) : (
+                <div className="agendas-list">
+                  {agendas.map((agenda) => (
+                    <div key={agenda.id} className="agenda-full-item">
+                      <div className="agenda-full-header">
+                        <div className="agenda-title-section">
+                          <button
+                            className="agenda-collapse-btn"
+                            onClick={() => toggleAgendaCollapse(agenda.id, agenda.is_collapsed)}
+                          >
+                            {agenda.is_collapsed ? '▶' : '▼'}
+                          </button>
+                          <h3 className="agenda-full-title">{agenda.title}</h3>
+                          <span className="agenda-item-count">
+                            ({agenda.agenda_items?.length || 0} items)
+                          </span>
+                        </div>
+                        <div className="agenda-full-actions">
+                          <button
+                            className="btn-secondary small"
+                            onClick={() => {
+                              const newTitle = prompt('Edit agenda title:', agenda.title);
+                              if (newTitle && newTitle.trim() && newTitle !== agenda.title) {
+                                updateAgenda(agenda.id, { title: newTitle.trim() });
+                              }
+                            }}
+                          >
+                            Edit Title
+                          </button>
+                          <button
+                            className="btn-danger small"
+                            onClick={() => {
+                              if (window.confirm(`Delete agenda "${agenda.title}"?`)) {
+                                deleteAgenda(agenda.id);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      {!agenda.is_collapsed && (
+                        <div className="agenda-full-content">
+                          <div className="agenda-items-list">
+                            {agenda.agenda_items?.map((item) => (
+                              <div key={item.id} className="agenda-item-row">
+                                <span className="agenda-bullet">•</span>
+                                <span className="agenda-item-text">{item.text}</span>
+                                <div className="agenda-item-actions">
+                                  <button
+                                    className="btn-followup"
+                                    onClick={() => openFollowUpModal(item.text)}
+                                    title="Create follow-up todo"
+                                  >
+                                    → Todo
+                                  </button>
+                                  <button
+                                    className="btn-delete-item"
+                                    onClick={() => {
+                                      if (window.confirm('Delete this agenda item?')) {
+                                        deleteAgendaItem(item.id);
+                                      }
+                                    }}
+                                    title="Delete item"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+
+                            <div className="add-agenda-item">
+                              <input
+                                type="text"
+                                placeholder="Add new agenda item..."
+                                className="add-item-input"
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter' && e.target.value.trim()) {
+                                    addAgendaItem(agenda.id, e.target.value.trim());
+                                    e.target.value = '';
+                                  }
+                                }}
+                              />
+                              <button
+                                className="btn-add-item"
+                                onClick={(e) => {
+                                  const input = e.target.previousElementSibling;
+                                  if (input.value.trim()) {
+                                    addAgendaItem(agenda.id, input.value.trim());
+                                    input.value = '';
+                                  }
+                                }}
+                              >
+                                Add
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          // Todo Sections (Work/Personal)
+          <div className="todo-sections">
           <div className="todo-section">
             <div className="section-header">
               <div className="section-header-left">
@@ -826,6 +1111,7 @@ function App() {
             </div>
           )}
         </div>
+        )}
       </header>
 
       <TagModal
@@ -844,6 +1130,7 @@ function App() {
         onDeleteWeeklyTask={deleteWeeklyTask}
       />
 
+
       <AddTodoModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -857,6 +1144,13 @@ function App() {
         todo={editTodo}
         tags={tags}
         onSave={saveTodoEdit}
+      />
+
+      <FollowUpModal
+        isOpen={isFollowUpModalOpen}
+        onClose={() => setIsFollowUpModalOpen(false)}
+        onCreateFollowUp={createFollowUpFromAgenda}
+        initialText={followUpInitialText}
       />
 
       <FloatingAddButton onClick={() => setIsAddModalOpen(true)} />
