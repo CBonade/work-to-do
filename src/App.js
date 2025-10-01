@@ -22,6 +22,7 @@ import EditTodoModal from './components/EditTodoModal';
 import WeeklyTaskModal from './components/WeeklyTaskModal';
 import WeeklyTaskItem from './components/WeeklyTaskItem';
 import FollowUpModal from './components/FollowUpModal';
+import AgendaModal from './components/AgendaModal';
 import LoginPage from './components/LoginPage';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -47,8 +48,10 @@ function App() {
   const [isWeeklyTaskModalOpen, setIsWeeklyTaskModalOpen] = useState(false);
   const [editTodo, setEditTodo] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isTagSectionCollapsed, setIsTagSectionCollapsed] = useState(true);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [followUpInitialText, setFollowUpInitialText] = useState('');
+  const [isAgendaModalOpen, setIsAgendaModalOpen] = useState(false);
   const [isDoneSectionCollapsed, setIsDoneSectionCollapsed] = useState(true);
   const [isWontDoSectionCollapsed, setIsWontDoSectionCollapsed] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -597,6 +600,14 @@ function App() {
     }
   };
 
+  const handleFloatingButtonClick = () => {
+    if (currentContext === 'agendas') {
+      setIsAgendaModalOpen(true);
+    } else {
+      setIsAddModalOpen(true);
+    }
+  };
+
   // Get current day of week (0 = Sunday, 1 = Monday, etc.) in ET timezone
   const getCurrentDayOfWeek = () => {
     const now = new Date();
@@ -775,16 +786,11 @@ function App() {
                 </div>
                 <div className="section-header-right">
                   <button
-                    className="desktop-add-btn"
-                    onClick={() => {
-                      const title = prompt('Enter agenda title:');
-                      if (title && title.trim()) {
-                        addAgenda({ title: title.trim() });
-                      }
-                    }}
-                    title="Add new agenda"
+                    className="desktop-add-btn mobile-hidden"
+                    onClick={() => setIsAgendaModalOpen(true)}
+                    title="Manage agendas"
                   >
-                    Add Agenda
+                    Manage Agendas
                   </button>
                 </div>
               </div>
@@ -797,14 +803,9 @@ function App() {
                   <p>Create your first agenda to get started organizing your meetings and notes.</p>
                   <button
                     className="btn-primary"
-                    onClick={() => {
-                      const title = prompt('Enter agenda title:');
-                      if (title && title.trim()) {
-                        addAgenda({ title: title.trim() });
-                      }
-                    }}
+                    onClick={() => setIsAgendaModalOpen(true)}
                   >
-                    Create First Agenda
+                    Manage Agendas
                   </button>
                 </div>
               ) : (
@@ -823,29 +824,6 @@ function App() {
                           <span className="agenda-item-count">
                             ({agenda.agenda_items?.length || 0} items)
                           </span>
-                        </div>
-                        <div className="agenda-full-actions">
-                          <button
-                            className="btn-secondary small"
-                            onClick={() => {
-                              const newTitle = prompt('Edit agenda title:', agenda.title);
-                              if (newTitle && newTitle.trim() && newTitle !== agenda.title) {
-                                updateAgenda(agenda.id, { title: newTitle.trim() });
-                              }
-                            }}
-                          >
-                            Edit Title
-                          </button>
-                          <button
-                            className="btn-danger small"
-                            onClick={() => {
-                              if (window.confirm(`Delete agenda "${agenda.title}"?`)) {
-                                deleteAgenda(agenda.id);
-                              }
-                            }}
-                          >
-                            Delete
-                          </button>
                         </div>
                       </div>
 
@@ -1053,7 +1031,17 @@ function App() {
           {/* Tag-filtered lists */}
           {tags.length > 0 && (
             <div className="tag-sections">
-              <h2>Lists by Tag</h2>
+              <div className="tag-section-header">
+                <h2>Lists by Tag</h2>
+                <button
+                  className="collapse-btn"
+                  onClick={() => setIsTagSectionCollapsed(!isTagSectionCollapsed)}
+                  title={isTagSectionCollapsed ? "Expand" : "Collapse"}
+                >
+                  {isTagSectionCollapsed ? "▼" : "▲"}
+                </button>
+              </div>
+              {!isTagSectionCollapsed && (
               <div className="tag-lists-grid">
                 {tags.map((tag) => {
                   const tagTodos = todos.filter(todo =>
@@ -1108,6 +1096,7 @@ function App() {
                   );
                 })}
               </div>
+              )}
             </div>
           )}
         </div>
@@ -1153,7 +1142,24 @@ function App() {
         initialText={followUpInitialText}
       />
 
-      <FloatingAddButton onClick={() => setIsAddModalOpen(true)} />
+      <AgendaModal
+        isOpen={isAgendaModalOpen}
+        onClose={() => setIsAgendaModalOpen(false)}
+        agendas={agendas}
+        onAddAgenda={addAgenda}
+        onDeleteAgenda={deleteAgenda}
+        onUpdateAgenda={updateAgenda}
+        onAddAgendaItem={addAgendaItem}
+        onDeleteAgendaItem={deleteAgendaItem}
+        onUpdateAgendaItem={updateAgendaItem}
+        currentContext={currentContext}
+      />
+
+      <FloatingAddButton
+        onClick={handleFloatingButtonClick}
+        icon={currentContext === 'agendas' ? 'edit' : 'add'}
+        title={currentContext === 'agendas' ? 'Manage agendas' : 'Add new todo'}
+      />
     </div>
   );
 }
